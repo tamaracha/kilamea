@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.0.xsd">
+
+    <changeSet id="create_accounts_table" author="kschroeer">
+        <createTable tableName="accounts">
+            <column name="id" type="TEXT">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="email" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="display_name" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="password" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="protocol" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ssl_active" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="incoming_host" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="incoming_port" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="outgoing_host" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="outgoing_port" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="create_folders_table" author="kschroeer">
+        <createTable tableName="folders">
+            <column name="id" type="TEXT">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="type" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="account" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="create_messages_table" author="kschroeer">
+        <createTable tableName="messages">
+            <column name="id" type="TEXT">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="email_reference" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="from_addresses" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="recipients" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="cc_addresses" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="bcc_addresses" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="sent_date" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="received_date" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="subject" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="content" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="raw_data" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="unread" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="folder" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="create_attachments_table" author="kschroeer">
+        <createTable tableName="attachments">
+            <column name="id" type="TEXT">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="file_name" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="content" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="message" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="create_contacts_table" author="kschroeer">
+        <createTable tableName="contacts">
+            <column name="id" type="TEXT">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="email" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="first_name" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_name" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="create_options_table" author="kschroeer">
+        <createTable tableName="options">
+            <column name="id" type="TEXT">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="value" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="insert_options_data" author="kschroeer">
+        <sql>
+            INSERT INTO options (id, value) VALUES ('app', '{}');
+        </sql>
+    </changeSet>
+
+    <changeSet id="add_foreign_keys" author="kschroeer">
+        <sql>
+            PRAGMA writable_schema = ON;
+
+            UPDATE sqlite_master
+            SET sql = substr(sql, 1, length(sql) - 1) || ', FOREIGN KEY (account) REFERENCES accounts(id))'
+            WHERE type = 'table' AND name = 'folders';
+
+            UPDATE sqlite_master
+            SET sql = substr(sql, 1, length(sql) - 1) || ', FOREIGN KEY (folder) REFERENCES folders(id))'
+            WHERE type = 'table' AND name = 'messages';
+
+            UPDATE sqlite_master
+            SET sql = substr(sql, 1, length(sql) - 1) || ', FOREIGN KEY (message) REFERENCES messages(id))'
+            WHERE type = 'table' AND name = 'attachments';
+
+            PRAGMA writable_schema = OFF;
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>

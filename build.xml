@@ -1,0 +1,110 @@
+<?xml version="1.0"?>
+<project name="Kilamea" basedir="." default="all">
+
+    <!-- Define properties -->
+    <property name="kotlin.home" value="C:/Users/Kay/Documents/kotlin-compiler-1.9.0/kotlinc"/>
+    <property name="jar.file" value="Kilamea.jar"/>
+    <property name="temp.file" value="temp.jar"/>
+    <property name="main.class" value="com.github.kilamea.Launcher"/>
+    <property name="class.path.entry" value="lib/commons-lang3.jar lib/gson.jar lib/javax.mail.jar lib/liquibase-core.jar lib/org.eclipse.core.commands.jar lib/org.eclipse.equinox.common.jar lib/org.eclipse.jface.jar lib/org.eclipse.osgi.jar lib/sqlite-jdbc.jar lib/swt-win32-win32-x86_64.jar"/>
+
+    <!-- Define target to replace spaces with semicolons in class path -->
+    <target name="replaceSpaces">
+        <script language="javascript">
+            <![CDATA[
+                var classPath = project.getProperty("class.path.entry");
+                var modifiedClassPath = classPath.replace(/ /g, ";");
+                project.setProperty("lib.files", modifiedClassPath);
+            ]]>
+        </script>
+    </target>
+
+    <!-- Define target to clean -->
+    <target name="clean">
+        <delete file="${jar.file}"/>
+        <delete file="${temp.file}"/>
+    </target>
+
+    <!-- Define target to compile Kotlin files -->
+    <target name="compile" depends="replaceSpaces,clean">
+        <exec executable="${kotlin.home}/bin/kotlinc.bat">
+            <arg value="-cp"/>
+            <arg value='"${lib.files}"'/>
+            <arg value="src/com/github/kilamea/Launcher.kt"/>
+            <arg value="src/com/github/kilamea/core/Bag.kt"/>
+            <arg value="src/com/github/kilamea/core/Client.kt"/>
+            <arg value="src/com/github/kilamea/core/Constants.kt"/>
+            <arg value="src/com/github/kilamea/core/Context.kt"/>
+            <arg value="src/com/github/kilamea/core/MailMapper.kt"/>
+            <arg value="src/com/github/kilamea/core/MailProtocol.kt"/>
+            <arg value="src/com/github/kilamea/core/MimeType.kt"/>
+            <arg value="src/com/github/kilamea/core/Options.kt"/>
+            <arg value="src/com/github/kilamea/core/ReceiveException.kt"/>
+            <arg value="src/com/github/kilamea/core/SendException.kt"/>
+            <arg value="src/com/github/kilamea/database/DatabaseManager.kt"/>
+            <arg value="src/com/github/kilamea/database/DBRuntimeException.kt"/>
+            <arg value="src/com/github/kilamea/entity/AbstractEntity.kt"/>
+            <arg value="src/com/github/kilamea/entity/Account.kt"/>
+            <arg value="src/com/github/kilamea/entity/AccountList.kt"/>
+            <arg value="src/com/github/kilamea/entity/Attachment.kt"/>
+            <arg value="src/com/github/kilamea/entity/AttachmentList.kt"/>
+            <arg value="src/com/github/kilamea/entity/Contact.kt"/>
+            <arg value="src/com/github/kilamea/entity/ContactList.kt"/>
+            <arg value="src/com/github/kilamea/entity/Folder.kt"/>
+            <arg value="src/com/github/kilamea/entity/FolderList.kt"/>
+            <arg value="src/com/github/kilamea/entity/FolderType.kt"/>
+            <arg value="src/com/github/kilamea/entity/ListFilter.kt"/>
+            <arg value="src/com/github/kilamea/entity/Message.kt"/>
+            <arg value="src/com/github/kilamea/entity/MessageList.kt"/>
+            <arg value="src/com/github/kilamea/i18n/I18n.kt"/>
+            <arg value="src/com/github/kilamea/i18n/Language.kt"/>
+            <arg value="src/com/github/kilamea/sort/ComparatorPool.kt"/>
+            <arg value="src/com/github/kilamea/sort/FieldComparator.kt"/>
+            <arg value="src/com/github/kilamea/sort/SortField.kt"/>
+            <arg value="src/com/github/kilamea/sort/SortOrder.kt"/>
+            <arg value="src/com/github/kilamea/swt/CocoaUIEnhancer.kt"/>
+            <arg value="src/com/github/kilamea/swt/Dimension.kt"/>
+            <arg value="src/com/github/kilamea/swt/FileChooser.kt"/>
+            <arg value="src/com/github/kilamea/swt/MessageDialog.kt"/>
+            <arg value="src/com/github/kilamea/swt/ModalDialog.kt"/>
+            <arg value="src/com/github/kilamea/swt/NumberValidator.kt"/>
+            <arg value="src/com/github/kilamea/swt/TabTraverse.kt"/>
+            <arg value="src/com/github/kilamea/util/FileUtils.kt"/>
+            <arg value="src/com/github/kilamea/util/PasswordCrypt.kt"/>
+            <arg value="src/com/github/kilamea/util/SystemUtils.kt"/>
+            <arg value="src/com/github/kilamea/view/AccountDialog.kt"/>
+            <arg value="src/com/github/kilamea/view/ComposeDialog.kt"/>
+            <arg value="src/com/github/kilamea/view/ContactDialog.kt"/>
+            <arg value="src/com/github/kilamea/view/FolderDialog.kt"/>
+            <arg value="src/com/github/kilamea/view/IFormValidator.kt"/>
+            <arg value="src/com/github/kilamea/view/Kilamea.kt"/>
+            <arg value="src/com/github/kilamea/view/MailboxViewerContentProvider.kt"/>
+            <arg value="src/com/github/kilamea/view/MenuFactory.kt"/>
+            <arg value="src/com/github/kilamea/view/OptionDialog.kt"/>
+            <arg value="src/com/github/kilamea/view/SearchDialog.kt"/>
+            <arg value="src/com/github/kilamea/view/SourceDialog.kt"/>
+            <arg value="src/com/github/kilamea/view/TreeDialog.kt"/>
+            <arg value="-include-runtime"/>
+            <arg value="-d"/>
+            <arg value="${temp.file}"/>
+        </exec>
+    </target>
+
+    <!-- Define target to update JAR file -->
+    <target name="updateJar" depends="compile">
+        <jar jarfile="${jar.file}">
+            <zipfileset src="${temp.file}"/>
+            <fileset dir="res"/>
+            <manifest>
+                <attribute name="Main-Class" value="${main.class}"/>
+                <attribute name="Class-Path" value="${class.path.entry}"/>
+            </manifest>
+        </jar>
+    </target>
+
+    <!-- Define target "all" to run replaceSpaces, clean, compile, and updateJar targets -->
+    <target name="all" depends="updateJar">
+        <echo message="All tasks completed"/>
+    </target>
+    
+</project>

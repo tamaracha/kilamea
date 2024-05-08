@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<launch4jConfig>
+  <headerType>gui</headerType>
+  <outfile>Kilamea.exe</outfile>
+  <jar>Kilamea.jar</jar>
+  <dontWrapJar>false</dontWrapJar>
+  <errTitle>Kilamea</errTitle>
+  <downloadUrl>http://java.com/download</downloadUrl>
+  <cmdLine></cmdLine>
+  <chdir>.</chdir>
+  <priority>normal</priority>
+  <stayAlive>false</stayAlive>
+  <restartOnCrash>true</restartOnCrash>
+  <classPath>
+    <mainClass>com.github.kilamea.Launcher</mainClass>
+    <cp>lib/commons-lang3.jar</cp>
+    <cp>lib/gson.jar</cp>
+    <cp>lib/javax.mail.jar</cp>
+    <cp>lib/liquibase-core.jar</cp>
+    <cp>lib/org.eclipse.core.commands.jar</cp>
+    <cp>lib/org.eclipse.equinox.common.jar</cp>
+    <cp>lib/org.eclipse.jface.jar</cp>
+    <cp>lib/org.eclipse.osgi.jar</cp>
+    <cp>lib/sqlite-jdbc.jar</cp>
+    <cp>lib/swt-win32-win32-x86_64.jar</cp>
+  </classPath>
+  <jre>
+    <path>jdk-22</path>
+    <minVersion>22</minVersion>
+    <maxVersion></maxVersion>
+  </jre>
+</launch4jConfig>
