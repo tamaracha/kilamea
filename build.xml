@@ -2,7 +2,7 @@
 <project name="Kilamea" basedir="." default="all">
 
     <!-- Define properties -->
-    <property name="kotlin.home" value="C:/Users/Kay/Documents/kotlin-compiler-1.9.0/kotlinc"/>
+    <property name="kotlin.home" value=""/>
     <property name="jar.file" value="Kilamea.jar"/>
     <property name="temp.file" value="temp.jar"/>
     <property name="main.class" value="com.github.kilamea.Launcher"/>
