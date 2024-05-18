@@ -2,7 +2,21 @@ package com.github.kilamea.sort
 
 import java.lang.reflect.Field
 
+/**
+ * A comparator that compares objects based on a specified field and sort order.
+ * 
+ * @since 0.1.0
+ * @property sortField The field to sort by.
+ * @property sortOrder The order in which to sort.
+ */
 internal class FieldComparator<T>(private var sortField: SortField, private var sortOrder: SortOrder) : Comparator<T> {
+    /**
+     * Compares two objects based on the specified field and sort order.
+     * 
+     * @param obj1 The first object to compare.
+     * @param obj2 The second object to compare.
+     * @return A negative integer, zero, or a positive integer as the first argument is less than, equal to, or greater than the second.
+     */
     @Suppress("UNCHECKED_CAST")
     override fun compare(obj1: T, obj2: T): Int {
         try {
@@ -35,15 +49,33 @@ internal class FieldComparator<T>(private var sortField: SortField, private var 
         }
     }
 
+    /**
+     * Sets the field by which to sort.
+     * 
+     * @param sortField The new field to sort by.
+     */
     fun setSortField(sortField: SortField) {
         this.sortField = sortField
     }
 
+    /**
+     * Sets the order in which to sort.
+     * 
+     * @param sortOrder The new order in which to sort.
+     */
     fun setSortOrder(sortOrder: SortOrder) {
         this.sortOrder = sortOrder
     }
 
     companion object {
+        /**
+         * Creates a new FieldComparator with the specified sort field and sort order.
+         * 
+         * @param T The type of objects compared.
+         * @param sortField The field to sort by.
+         * @param sortOrder The order in which to sort.
+         * @return A new FieldComparator instance.
+         */
         fun <T> createComparator(sortField: SortField, sortOrder: SortOrder): FieldComparator<T> {
             return FieldComparator(sortField, sortOrder)
         }

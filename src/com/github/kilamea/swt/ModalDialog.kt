@@ -10,7 +10,18 @@ import org.eclipse.swt.widgets.Shell
 import com.github.kilamea.i18n.I18n
 import com.github.kilamea.util.SystemUtils
 
+/**
+ * A modal dialog with customizable buttons.
+ *
+ * @since 0.1.0
+ * @property buttonKeys An array of keys for the buttons.
+ */
 abstract class ModalDialog(parentShell: Shell, private val buttonKeys: Array<String>) : Dialog(parentShell) {
+    /**
+     * Creates the buttons for the button bar.
+     * 
+     * @param parent The parent composite.
+     */
     override fun createButtonsForButtonBar(parent: Composite) {
         if (buttonKeys.isNotEmpty()) {
             if (isButtonBarForAssistant()) {
@@ -32,6 +43,11 @@ abstract class ModalDialog(parentShell: Shell, private val buttonKeys: Array<Str
         }
     }
 
+    /**
+     * Creates a button bar for an assistant dialog.
+     * 
+     * @param parent The parent composite.
+     */
     private fun createButtonBarForAssistant(parent: Composite) {
         var backButtonText = "back_button"
         var nextButtonText = "next_button"
@@ -48,6 +64,12 @@ abstract class ModalDialog(parentShell: Shell, private val buttonKeys: Array<Str
         createButton(parent, IDialogConstants.CANCEL_ID, I18n.getString(cancelButtonText), false)
     }
 
+    /**
+     * Creates a button for the specified index.
+     * 
+     * @param parent The parent composite.
+     * @param index The index of the button.
+     */
     private fun createButtonForIndex(parent: Composite, index: Int) {
         var buttonText = buttonKeys.getOrNull(index) ?: "button${index + 1}"
 
@@ -58,6 +80,11 @@ abstract class ModalDialog(parentShell: Shell, private val buttonKeys: Array<Str
         }
     }
 
+    /**
+     * Determines if the button bar is for an assistant dialog.
+     * 
+     * @return True if the button bar is for an assistant, false otherwise.
+     */
     private fun isButtonBarForAssistant(): Boolean {
         return (buttonKeys.size == 3 && buttonKeys[0] == "back_button" && buttonKeys[1] == "next_button" && buttonKeys[2] == "cancel_button")
     }

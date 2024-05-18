@@ -29,6 +29,12 @@ import liquibase.database.Database
 import liquibase.database.DatabaseFactory
 import liquibase.database.jvm.JdbcConnection
 
+/**
+ * Manages database connections and operations for email accounts, folders, messages, attachments, and contacts.
+ *
+ * @since 0.1.0
+ * @property connection The SQL connection to the database.
+ */
 class DatabaseManager {
     private var connection: Connection? = null
 
@@ -90,6 +96,12 @@ class DatabaseManager {
     private val SQL_SELECT_OPTIONS = "SELECT value FROM options WHERE id = \"app\""
     private val SQL_UPDATE_OPTIONS = "UPDATE options SET value = ? WHERE id = \"app\""
 
+    /**
+     * Connects to the database using the provided file name.
+     * 
+     * @param fileName The name of the database file.
+     * @throws DBRuntimeException If an error occurs while connecting to the database.
+     */
     @Throws(DBRuntimeException::class)
     fun connect(fileName: String) {
         val correctedFileName = fileName.replace("\\\\", "/")
@@ -106,6 +118,11 @@ class DatabaseManager {
         }
     }
 
+    /**
+     * Disconnects from the database.
+     * 
+     * @throws DBRuntimeException If an error occurs while disconnecting from the database.
+     */
     @Throws(DBRuntimeException::class)
     fun disconnect() {
         try {
@@ -116,6 +133,12 @@ class DatabaseManager {
         }
     }
 
+    /**
+     * Adds a new account to the database.
+     * 
+     * @param account The account to add.
+     * @throws DBRuntimeException If an error occurs while adding the account.
+     */
     @Throws(DBRuntimeException::class)
     fun addAccount(account: Account) {
         checkConnection()
@@ -145,6 +168,12 @@ class DatabaseManager {
         }
     }
 
+    /**
+     * Adds a new folder to the database.
+     * 
+     * @param folder The folder to add.
+     * @throws DBRuntimeException If an error occurs while adding the folder.
+     */
     @Throws(DBRuntimeException::class)
     fun addFolder(folder: Folder) {
         checkConnection()
@@ -163,6 +192,12 @@ class DatabaseManager {
         }
     }
 
+    /**
+     * Adds a new message to the database.
+     * 
+     * @param message The message to add.
+     * @throws DBRuntimeException If an error occurs while adding the message.
+     */
     @Throws(DBRuntimeException::class)
     fun addMessage(message: Message) {
         checkConnection()
@@ -193,6 +228,12 @@ class DatabaseManager {
         }
     }
 
+    /**
+     * Adds a new attachment to the database.
+     * 
+     * @param attachment The attachment to add.
+     * @throws DBRuntimeException If an error occurs while adding the attachment.
+     */
     @Throws(DBRuntimeException::class)
     fun addAttachment(attachment: Attachment) {
         checkConnection()
@@ -211,6 +252,12 @@ class DatabaseManager {
         }
     }
 
+    /**
+     * Adds a new contact to the database.
+     * 
+     * @param contact The contact to add.
+     * @throws DBRuntimeException If an error occurs while adding the contact.
+     */
     @Throws(DBRuntimeException::class)
     fun addContact(contact: Contact) {
         checkConnection()
@@ -229,6 +276,12 @@ class DatabaseManager {
         }
     }
 
+    /**
+     * Updates the account in the database.
+     * 
+     * @param account The account to update.
+     * @throws DBRuntimeException If an error occurs while updating the account.
+     */
     @Throws(DBRuntimeException::class)
     fun updateAccount(account: Account) {
         checkConnection()
@@ -254,6 +307,13 @@ class DatabaseManager {
         }
     }
 
+    /**
+     * Updates the name of the folder in the database.
+     * 
+     * @param id The folder ID.
+     * @param name The new name of the folder.
+     * @throws DBRuntimeException If an error occurs while updating the folder name.
+     */
     @Throws(DBRuntimeException::class)
     fun updateFolderName(id: String, name: String) {
         checkConnection()
@@ -270,6 +330,13 @@ class DatabaseManager {
         }
     }
 
+    /**
+     * Updates the folder of a message in the database.
+     * 
+     * @param id The message ID.
+     * @param folder The new folder ID.
+     * @throws DBRuntimeException If an error occurs while updating the message folder.
+     */
     @Throws(DBRuntimeException::class)
     fun updateMessageFolder(id: String, folder: String) {
         checkConnection()
@@ -286,6 +353,13 @@ class DatabaseManager {
         }
     }
 
+    /**
+     * Updates the unread status of a message in the database.
+     * 
+     * @param id The message ID.
+     * @param unread The new unread status.
+     * @throws DBRuntimeException If an error occurs while updating the unread status.
+     */
     @Throws(DBRuntimeException::class)
     fun updateMessageUnread(id: String, unread: Boolean) {
         checkConnection()
@@ -302,6 +376,12 @@ class DatabaseManager {
         }
     }
 
+    /**
+     * Updates the contact in the database.
+     * 
+     * @param contact The contact to update.
+     * @throws DBRuntimeException If an error occurs while updating the contact.
+     */
     @Throws(DBRuntimeException::class)
     fun updateContact(contact: Contact) {
         checkConnection()
@@ -320,6 +400,12 @@ class DatabaseManager {
         }
     }
 
+    /**
+     * Deletes an account from the database.
+     * 
+     * @param account The account to delete.
+     * @throws DBRuntimeException If an error occurs while deleting the account.
+     */
     @Throws(DBRuntimeException::class)
     fun deleteAccount(account: Account) {
         checkConnection()
@@ -336,6 +422,12 @@ class DatabaseManager {
         }
     }
 
+    /**
+     * Deletes a folder from the database.
+     * 
+     * @param folder The folder to delete.
+     * @throws DBRuntimeException If an error occurs while deleting the folder.
+     */
     @Throws(DBRuntimeException::class)
     fun deleteFolder(folder: Folder) {
         checkConnection()
@@ -352,6 +444,12 @@ class DatabaseManager {
         }
     }
 
+    /**
+     * Deletes a message from the database.
+     * 
+     * @param message The message to delete.
+     * @throws DBRuntimeException If an error occurs while deleting the message.
+     */
     @Throws(DBRuntimeException::class)
     fun deleteMessage(message: Message) {
         checkConnection()
@@ -368,6 +466,12 @@ class DatabaseManager {
         }
     }
 
+    /**
+     * Deletes an attachment from the database.
+     * 
+     * @param attachment The attachment to delete.
+     * @throws DBRuntimeException If an error occurs while deleting the attachment.
+     */
     @Throws(DBRuntimeException::class)
     fun deleteAttachment(attachment: Attachment) {
         checkConnection()
@@ -382,6 +486,12 @@ class DatabaseManager {
         }
     }
 
+    /**
+     * Deletes a contact from the database.
+     * 
+     * @param contact The contact to delete.
+     * @throws DBRuntimeException If an error occurs while deleting the contact.
+     */
     @Throws(DBRuntimeException::class)
     fun deleteContact(contact: Contact) {
         checkConnection()
@@ -396,6 +506,12 @@ class DatabaseManager {
         }
     }
 
+    /**
+     * Applies a message filter to retrieve messages from the database.
+     * 
+     * @param theFolder The folder to filter messages from.
+     * @throws DBRuntimeException If an error occurs while applying the message filter.
+     */
     @Throws(DBRuntimeException::class)
     fun applyMessageFilter(theFolder: Folder) {
         checkConnection()
@@ -463,6 +579,12 @@ class DatabaseManager {
         }
     }
 
+    /**
+     * Loads accounts from the database.
+     *
+     * @param bag The bag object to populate with loaded accounts.
+     * @throws DBRuntimeException If an error occurs while loading accounts.
+     */
     @Throws(DBRuntimeException::class)
     fun loadAccounts(bag: Bag) {
         checkConnection()
@@ -549,6 +671,12 @@ class DatabaseManager {
         }
     }
 
+    /**
+     * Loads contacts from the database.
+     *
+     * @param bag The bag object to populate with loaded contacts.
+     * @throws DBRuntimeException If an error occurs while loading contacts.
+     */
     @Throws(DBRuntimeException::class)
     fun loadContacts(bag: Bag) {
         checkConnection()
@@ -572,6 +700,12 @@ class DatabaseManager {
         }
     }
 
+    /**
+     * Loads options from the database.
+     *
+     * @param bag The bag object to populate with loaded options.
+     * @throws DBRuntimeException If an error occurs while loading options.
+     */
     @Throws(DBRuntimeException::class)
     fun loadOptions(bag: Bag) {
         checkConnection()
@@ -591,6 +725,12 @@ class DatabaseManager {
         }
     }
 
+    /**
+     * Saves options to the database.
+     *
+     * @param bag The bag object containing options to save.
+     * @throws DBRuntimeException If an error occurs while saving options.
+     */
     @Throws(DBRuntimeException::class)
     fun saveOptions(bag: Bag) {
         checkConnection()
@@ -607,6 +747,11 @@ class DatabaseManager {
         }
     }
 
+    /**
+     * Checks if the database connection is established.
+     *
+     * @throws DBRuntimeException If the connection is not established.
+     */
     @Throws(DBRuntimeException::class)
     private fun checkConnection() {
         if (connection == null) {
@@ -614,6 +759,11 @@ class DatabaseManager {
         }
     }
 
+    /**
+     * Runs database migrations using Liquibase.
+     *
+     * @throws Exception If an error occurs while running the migrations.
+     */
     @Throws(Exception::class)
     private fun runMigrations() {
         val changeLogLocation = "migration/changelog.xml"
@@ -625,6 +775,9 @@ class DatabaseManager {
         updateCommand.execute()
     }
 
+    /**
+     * Sets foreign key pragma for SQLite.
+     */
     private fun setForeignKeysPragma() {
         try {
             connection?.createStatement()?.use { stmt ->
@@ -634,6 +787,13 @@ class DatabaseManager {
         }
     }
 
+    /**
+     * Encrypts the given password.
+     *
+     * @param password The password to encrypt.
+     * @return The encrypted password.
+     * @throws DBRuntimeException If an error occurs while encrypting the password.
+     */
     private fun encryptPassword(password: String): String {
         var cipher = ""
 
@@ -645,6 +805,12 @@ class DatabaseManager {
         return cipher
     }
 
+    /**
+     * Decrypts the given password.
+     *
+     * @param password The password to decrypt.
+     * @return The decrypted password.
+     */
     private fun decryptPassword(password: String): String {
         var plain = ""
 

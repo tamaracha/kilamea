@@ -1,5 +1,10 @@
 package com.github.kilamea.core
 
+/**
+ * Interface containing application constants.
+ *
+ * @since 0.1.0
+ */
 interface Constants {
     companion object {
         const val APP_NAME: String = "Kilamea"

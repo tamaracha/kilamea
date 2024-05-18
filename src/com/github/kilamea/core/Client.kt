@@ -23,7 +23,20 @@ import com.github.kilamea.entity.Message
 import com.github.kilamea.entity.MessageList
 import com.github.kilamea.i18n.I18n
 
+/**
+ * Class responsible for handling email client operations such as receiving and sending emails.
+ *
+ * @since 0.1.0
+ */
 class Client {
+    /**
+     * Retrieves a list of unread messages from the specified email account.
+     *
+     * @param account The account from which to receive messages.
+     * @param options Additional options for message retrieval.
+     * @return A list of unread messages.
+     * @throws ReceiveException If an error occurs during message retrieval.
+     */
     @Throws(ReceiveException::class)
     fun receive(account: Account, options: Options): MessageList {
         disableSSLValidation()
@@ -76,6 +89,13 @@ class Client {
         }
     }
 
+    /**
+     * Sends an email using the specified account and message.
+     *
+     * @param account The account from which to send the email.
+     * @param message The message to be sent.
+     * @throws SendException If an error occurs during email sending.
+     */
     @Throws(SendException::class)
     fun send(account: Account, message: Message) {
         disableSSLValidation()

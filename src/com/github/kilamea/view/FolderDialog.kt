@@ -20,12 +20,24 @@ import com.github.kilamea.swt.Dimension
 import com.github.kilamea.swt.MessageDialog
 import com.github.kilamea.swt.ModalDialog
 
+/**
+ * Represents a dialog for managing folders.
+ * 
+ * @since 0.1.0
+ * @property folders The list of folders.
+ * @property folder The folder being edited.
+ */
 internal class FolderDialog(parentShell: Shell, private val folders: FolderList, private val folder: Folder) :
     ModalDialog(parentShell, arrayOf("ok_button", "cancel_button")), IFormValidator {
 
     private lateinit var nameLabel: Label
     private lateinit var nameText: Text
 
+    /**
+     * Configures the shell (window) settings for the dialog.
+     * 
+     * @param newShell The shell to configure.
+     */
     override fun configureShell(newShell: Shell) {
         super.configureShell(newShell)
         newShell.text = I18n.getString("folder_window_title")
@@ -36,6 +48,12 @@ internal class FolderDialog(parentShell: Shell, private val folders: FolderList,
         })
     }
 
+    /**
+     * Creates the main content area of the dialog.
+     * 
+     * @param parent The parent composite in which the dialog area is created.
+     * @return The control representing the dialog area.
+     */
     override fun createDialogArea(parent: Composite): Control {
         val container = super.createDialogArea(parent) as Composite
         val gridLayout = container.layout as GridLayout
@@ -56,6 +74,10 @@ internal class FolderDialog(parentShell: Shell, private val folders: FolderList,
         return container
     }
 
+    /**
+     * Handles the behavior when the OK button is pressed.
+     * Closes the dialog if validation passes.
+     */
     override fun okPressed() {
         if (validate()) {
             folder.name = nameText.text
@@ -63,6 +85,11 @@ internal class FolderDialog(parentShell: Shell, private val folders: FolderList,
         }
     }
 
+    /**
+     * Validates the form inputs.
+     * 
+     * @return True if the form inputs are valid, false otherwise.
+     */
     override fun validate(): Boolean {
         var value = nameText.text.trim()
         nameText.text = value

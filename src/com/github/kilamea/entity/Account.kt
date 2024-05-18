@@ -3,6 +3,23 @@ package com.github.kilamea.entity
 import com.github.kilamea.core.MailProtocol
 import com.github.kilamea.i18n.I18n
 
+/**
+ * Represents an email account with its settings and folders.
+ *
+ * @since 0.1.0
+ * @property email The email address of the account.
+ * @property displayName The name associated with the account.
+ * @property user The username for authentication.
+ * @property password The password for authentication.
+ * @property protocol The mail protocol used (e.g., IMAP or POP3).
+ * @property sslActive Indicates if SSL is active.
+ * @property incomingHost The host for incoming mail.
+ * @property incomingPort The port for incoming mail.
+ * @property outgoingHost The host for outgoing mail.
+ * @property outgoingPort The port for outgoing mail.
+ * @property folders The list of folders associated with the account.
+ * @property displayNameAndEmail The name and email formatted as a string.
+ */
 class Account : AbstractEntity() {
     var email: String = ""
     var displayName: String = ""
@@ -19,6 +36,9 @@ class Account : AbstractEntity() {
     val displayNameAndEmail: String
         get() = "$displayName <$email>"
 
+    /**
+     * Initializes the default folders for the account.
+     */
     fun initFolders() {
         val folderList = FolderList()
 
@@ -31,6 +51,13 @@ class Account : AbstractEntity() {
         folders = folderList
     }
 
+    /**
+     * Creates a folder with the specified name key and type.
+     *
+     * @param nameKey The key for the folder's name.
+     * @param type The type of the folder.
+     * @return The created folder.
+     */
     private fun createFolder(nameKey: String, type: FolderType): Folder {
         val folder = Folder()
         folder.name = I18n.getString(nameKey)
@@ -39,6 +66,12 @@ class Account : AbstractEntity() {
         return folder
     }
 
+    /**
+     * Retrieves a folder by its type.
+     *
+     * @param type The type of the folder.
+     * @return The folder of the specified type, or null if not found.
+     */
     fun getFolderByType(type: FolderType): Folder? {
         for (folder in folders) {
             if (folder.type == type) {
@@ -48,6 +81,11 @@ class Account : AbstractEntity() {
         return null
     }
 
+    /**
+     * Returns the email address of the account.
+     *
+     * @return The email address as a string.
+     */
     override fun toString(): String {
         return email
     }

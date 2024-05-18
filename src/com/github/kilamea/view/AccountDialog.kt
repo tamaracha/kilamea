@@ -28,6 +28,13 @@ import com.github.kilamea.swt.MessageDialog
 import com.github.kilamea.swt.ModalDialog
 import com.github.kilamea.swt.NumberValidator
 
+/**
+ * Represents a dialog for managing email accounts, including adding, editing, and deleting email accounts.
+ * 
+ * @since 0.1.0
+ * @property bag The Bag object containing the account information.
+ * @property database The database manager for handling database operations.
+ */
 internal class AccountDialog(parentShell: Shell, private val bag: Bag, private val database: DatabaseManager) :
     ModalDialog(parentShell, emptyArray<String>()), IFormValidator {
 
@@ -58,6 +65,11 @@ internal class AccountDialog(parentShell: Shell, private val bag: Bag, private v
     private var account: Account? = null
     private var isNew: Boolean = false
 
+    /**
+     * Configures the shell (window) settings for the dialog.
+     * 
+     * @param newShell The shell to configure.
+     */
     override fun configureShell(newShell: Shell) {
         super.configureShell(newShell)
         newShell.text = I18n.getString("account_window_title")
@@ -68,6 +80,12 @@ internal class AccountDialog(parentShell: Shell, private val bag: Bag, private v
         })
     }
 
+    /**
+     * Creates the main content area of the dialog.
+     * 
+     * @param parent The parent composite in which the dialog area is created.
+     * @return The control representing the dialog area.
+     */
     override fun createDialogArea(parent: Composite): Control {
         val container = super.createDialogArea(parent) as Composite
         val gridLayout = container.layout as GridLayout
@@ -251,6 +269,11 @@ internal class AccountDialog(parentShell: Shell, private val bag: Bag, private v
         return container
     }
 
+    /**
+     * Validates the input fields to ensure they are not empty and that the email address is unique.
+     * 
+     * @return true if the validation passes, false otherwise.
+     */
     override fun validate(): Boolean {
         var value = emailCombo.text.trim()
         emailCombo.text = value
@@ -327,6 +350,9 @@ internal class AccountDialog(parentShell: Shell, private val bag: Bag, private v
         return true
     }
 
+    /**
+     * Fills the email combo box with account emails from the bag.
+     */
     private fun fillCombo() {
         emailCombo.removeAll()
         var selectionIndex = -1
@@ -352,6 +378,11 @@ internal class AccountDialog(parentShell: Shell, private val bag: Bag, private v
         }
     }
 
+    /**
+     * Selects an account from the list based on the given index.
+     * 
+     * @param index The index of the account to select.
+     */
     private fun selectAccount(index: Int) {
         isNew = false
         account = bag.accounts[index]
@@ -359,6 +390,9 @@ internal class AccountDialog(parentShell: Shell, private val bag: Bag, private v
         deleteButton.isEnabled = true
     }
 
+    /**
+     * Displays the selected account's details in the form.
+     */
     private fun showAccount() {
         emailCombo.text = account?.email ?: ""
         nameText.text = account?.displayName ?: ""
@@ -372,6 +406,9 @@ internal class AccountDialog(parentShell: Shell, private val bag: Bag, private v
         outgoingPortText.text = account?.outgoingPort?.toString() ?: ""
     }
 
+    /**
+     * Creates a new account and displays its details in the form.
+     */
     private fun newAccount() {
         isNew = true
         account = Account()
@@ -382,6 +419,9 @@ internal class AccountDialog(parentShell: Shell, private val bag: Bag, private v
         }
     }
 
+    /**
+     * Saves the current account details to the database.
+     */
     private fun saveAccount() {
         if (validate()) {
             account?.apply {
@@ -412,6 +452,9 @@ internal class AccountDialog(parentShell: Shell, private val bag: Bag, private v
         }
     }
 
+    /**
+     * Deletes the current account from the database.
+     */
     private fun deleteAccount() {
         try {
             account?.let {

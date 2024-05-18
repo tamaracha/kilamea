@@ -30,7 +30,20 @@ import com.github.kilamea.entity.Attachment
 import com.github.kilamea.entity.AttachmentList
 import com.github.kilamea.entity.Message
 
+/**
+ * Utility object for mapping email-related data.
+ *
+ * @since 0.1.0
+ */
 internal object MailMapper {
+    /**
+     * Maps a MimeMessage to a Message object.
+     *
+     * @param email The MimeMessage to map.
+     * @return The mapped Message object.
+     * @throws IOException If an I/O error occurs.
+     * @throws MessagingException If a messaging error occurs.
+     */
     @Throws(IOException::class, MessagingException::class)
     fun map(email: MimeMessage): Message {
         val newMessage = Message()
@@ -68,6 +81,15 @@ internal object MailMapper {
         return newMessage
     }
 
+    /**
+     * Maps a Message object to a MimeMessage.
+     *
+     * @param session The email session to use.
+     * @param message The Message object to map.
+     * @return The mapped MimeMessage.
+     * @throws IOException If an I/O error occurs.
+     * @throws MessagingException If a messaging error occurs.
+     */
     @Throws(IOException::class, MessagingException::class)
     fun map(session: Session, message: Message): MimeMessage {
         val newEmail = MimeMessage(session)
@@ -103,6 +125,14 @@ internal object MailMapper {
         return newEmail
     }
 
+    /**
+     * Converts a MimeMessage to its raw string representation.
+     *
+     * @param email The MimeMessage to convert.
+     * @return The string representation of the MimeMessage.
+     * @throws IOException If an I/O error occurs.
+     * @throws MessagingException If a messaging error occurs.
+     */
     @Throws(IOException::class, MessagingException::class)
     private fun emailToString(email: MimeMessage): String {
         val outputStream = ByteArrayOutputStream()
@@ -110,6 +140,14 @@ internal object MailMapper {
         return outputStream.toString()
     }
 
+    /**
+     * Extracts content from a MimeMultipart object and sets it in the given Message object.
+     *
+     * @param multipart The MimeMultipart to extract content from.
+     * @param message The Message object to set the extracted content.
+     * @throws IOException If an I/O error occurs.
+     * @throws MessagingException If a messaging error occurs.
+     */
     @Throws(IOException::class, MessagingException::class)
     private fun extractMultipart(multipart: MimeMultipart, message: Message) {
         val textContent = StringBuilder()
@@ -149,6 +187,15 @@ internal object MailMapper {
         }
     }
 
+    /**
+     * Adds text content and attachments to a MimeMessage.
+     *
+     * @param email The MimeMessage to add content and attachments.
+     * @param text The text content to add.
+     * @param attachments The attachments to add.
+     * @throws IOException If an I/O error occurs.
+     * @throws MessagingException If a messaging error occurs.
+     */
     @Throws(IOException::class, MessagingException::class)
     private fun addMultipart(email: MimeMessage, text: String, attachments: AttachmentList) {
         val multipart = MimeMultipart()
@@ -169,10 +216,22 @@ internal object MailMapper {
         email.setContent(multipart)
     }
 
+    /**
+     * Collects email addresses from an array of Address objects and returns them as a single string.
+     *
+     * @param addresses The array of Address objects.
+     * @return A string of collected email addresses, separated by commas.
+     */
     private fun collectAddresses(addresses: Array<out Address>?): String {
         return addresses?.joinToString(", ") { decodeAddress(it) } ?: ""
     }
 
+    /**
+     * Decodes an email address to its string representation.
+     *
+     * @param address The Address to decode.
+     * @return The decoded email address as a string.
+     */
     private fun decodeAddress(address: Address): String {
         return try {
             val internetAddress = InternetAddress(address.toString())
@@ -188,6 +247,14 @@ internal object MailMapper {
         }
     }
 
+    /**
+     * Reads the content of a BodyPart as a byte array.
+     *
+     * @param bodyPart The BodyPart to read content from.
+     * @return The content of the BodyPart as a byte array.
+     * @throws IOException If an I/O error occurs.
+     * @throws MessagingException If a messaging error occurs.
+     */
     @Throws(IOException::class, MessagingException::class)
     private fun getContentBytes(bodyPart: BodyPart): ByteArray {
         bodyPart.inputStream.use { inputStream ->
@@ -202,6 +269,14 @@ internal object MailMapper {
         }
     }
 
+    /**
+     * Parses a string of recipient email addresses into an array of InternetAddress objects.
+     * 
+     * @param recipients A string containing recipient email addresses, separated by commas or semicolons.
+     * @return An array of InternetAddress objects.
+     * @throws AddressException If any of the addresses are invalid.
+     * @throws UnsupportedEncodingException If the encoding is not supported.
+     */
     @Throws(AddressException::class, UnsupportedEncodingException::class)
     private fun parse(recipients: String): Array<InternetAddress> {
         val encodedRecipients = StringBuilder()

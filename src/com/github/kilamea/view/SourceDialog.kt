@@ -15,11 +15,22 @@ import com.github.kilamea.i18n.I18n
 import com.github.kilamea.swt.Dimension
 import com.github.kilamea.swt.ModalDialog
 
+/**
+ * Represents a dialog for displaying source code or raw data.
+ * 
+ * @since 0.1.0
+ * @property rawData The raw data or source code to be displayed.
+ */
 internal class SourceDialog(parentShell: Shell, private val rawData: String) :
     ModalDialog(parentShell, emptyArray<String>()) {
 
     private lateinit var sourceText: Text
 
+    /**
+     * Configures the shell (window) settings for the dialog.
+     * 
+     * @param newShell The shell to configure.
+     */
     override fun configureShell(newShell: Shell) {
         super.configureShell(newShell)
         newShell.text = I18n.getString("source_window_title")
@@ -30,6 +41,12 @@ internal class SourceDialog(parentShell: Shell, private val rawData: String) :
         })
     }
 
+    /**
+     * Creates the main content area of the dialog.
+     * 
+     * @param parent The parent composite in which the dialog area is created.
+     * @return The control representing the dialog area.
+     */
     override fun createDialogArea(parent: Composite): Control {
         val container = super.createDialogArea(parent) as Composite
         container.layout = GridLayout(1, false)

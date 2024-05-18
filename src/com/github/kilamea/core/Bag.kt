@@ -5,11 +5,24 @@ import com.github.kilamea.entity.AccountList
 import com.github.kilamea.entity.ContactList
 import com.github.kilamea.entity.Folder
 
+/**
+ * Holds the main data structures for accounts, contacts, and options.
+ *
+ * @since 0.1.0
+ * @property accounts The list of email accounts.
+ * @property contacts The list of contacts.
+ * @property options The application options.
+ */
 class Bag {
     var accounts: AccountList = AccountList()
     var contacts: ContactList = ContactList()
     var options: Options = Options()
 
+    /**
+     * Finds the last accessed mailbox entry.
+     *
+     * @return The last accessed mailbox entry if found, otherwise null.
+     */
     fun findLastMailboxEntry(): AbstractEntity? {
         var treeItem: AbstractEntity? = null
 

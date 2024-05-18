@@ -22,6 +22,13 @@ import com.github.kilamea.i18n.I18n
 import com.github.kilamea.swt.MessageDialog
 import com.github.kilamea.swt.ModalDialog
 
+/**
+ * Represents a dialog for displaying a tree structure with selectable items.
+ * The items are populated from the provided bag.
+ * 
+ * @since 0.1.0
+ * @property bag The bag containing the items to be displayed in the tree.
+ */
 internal class TreeDialog(parentShell: Shell, private val bag: Bag) :
     ModalDialog(parentShell, arrayOf("ok_button", "cancel_button")), IFormValidator {
 
@@ -29,6 +36,11 @@ internal class TreeDialog(parentShell: Shell, private val bag: Bag) :
     private lateinit var mailboxViewer: TreeViewer
     private var selectedFolder: Folder? = null
 
+    /**
+     * Configures the shell (window) settings for the dialog.
+     * 
+     * @param newShell The shell to configure.
+     */
     override fun configureShell(newShell: Shell) {
         super.configureShell(newShell)
         newShell.text = I18n.getString("tree_window_title")
@@ -39,6 +51,12 @@ internal class TreeDialog(parentShell: Shell, private val bag: Bag) :
         })
     }
 
+    /**
+     * Creates the main content area of the dialog.
+     * 
+     * @param parent The parent composite in which the dialog area is created.
+     * @return The control representing the dialog area.
+     */
     override fun createDialogArea(parent: Composite): Control {
         val container = super.createDialogArea(parent) as Composite
 
@@ -80,12 +98,21 @@ internal class TreeDialog(parentShell: Shell, private val bag: Bag) :
         return container
     }
 
+    /**
+     * Handles the behavior when the OK button is pressed.
+     * Closes the dialog if validation passes.
+     */
     override fun okPressed() {
         if (validate()) {
             super.okPressed()
         }
     }
 
+    /**
+     * Validates the selected folder.
+     * 
+     * @return True if the selected folder is valid, false otherwise.
+     */
     override fun validate(): Boolean {
         if (selectedFolder == null) {
             MessageDialog.openError(I18n.getString("tree_no_folder_error"))
@@ -95,6 +122,11 @@ internal class TreeDialog(parentShell: Shell, private val bag: Bag) :
         return true
     }
 
+    /**
+     * Returns the selected folder.
+     * 
+     * @return The selected folder.
+     */
     fun getSelectedFolder(): Folder {
         return selectedFolder!!
     }

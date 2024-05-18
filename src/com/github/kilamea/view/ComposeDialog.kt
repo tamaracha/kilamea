@@ -40,6 +40,13 @@ import com.github.kilamea.swt.MessageDialog
 import com.github.kilamea.swt.ModalDialog
 import com.github.kilamea.swt.TabTraverse
 
+/**
+ * A dialog for composing emails, providing options to send, save as draft, and discard emails.
+ * 
+ * @since 0.1.0
+ * @property bag The Bag object containing account and contact information.
+ * @property message The Message object representing the email being composed.
+ */
 internal class ComposeDialog(parentShell: Shell, private val bag: Bag, private val message: Message) :
     ModalDialog(parentShell, emptyArray<String>()), IFormValidator {
 
@@ -76,6 +83,11 @@ internal class ComposeDialog(parentShell: Shell, private val bag: Bag, private v
         createActions()
     }
 
+    /**
+     * Configures the shell (window) settings for the dialog.
+     * 
+     * @param newShell The shell to configure.
+     */
     override fun configureShell(newShell: Shell) {
         super.configureShell(newShell)
         newShell.text = I18n.getString("compose_window_title")
@@ -86,6 +98,12 @@ internal class ComposeDialog(parentShell: Shell, private val bag: Bag, private v
         })
     }
 
+    /**
+     * Creates the main content area of the dialog.
+     * 
+     * @param parent The parent composite in which the dialog area is created.
+     * @return The control representing the dialog area.
+     */
     override fun createDialogArea(parent: Composite): Control {
         val container = super.createDialogArea(parent) as Composite
         val gridLayout = container.layout as GridLayout
@@ -323,10 +341,20 @@ internal class ComposeDialog(parentShell: Shell, private val bag: Bag, private v
         return container
     }
 
+    /**
+     * Sets the read-only mode of the dialog.
+     * 
+     * @param readOnly True if the dialog is set to read-only mode, false otherwise.
+     */
     fun setReadOnly(readOnly: Boolean) {
         this.readOnly = readOnly
     }
 
+    /**
+     * Validates the form inputs.
+     * 
+     * @return True if the form inputs are valid, false otherwise.
+     */
     override fun validate(): Boolean {
         var value = recipientText.text.trim()
         recipientText.text = value
@@ -339,6 +367,9 @@ internal class ComposeDialog(parentShell: Shell, private val bag: Bag, private v
         return true
     }
 
+    /**
+     * Creates actions for contacts and attachments.
+     */
     private fun createActions() {
         val actionCount = bag.contacts.size
         contactActions = Array(actionCount) { i ->
@@ -355,12 +386,24 @@ internal class ComposeDialog(parentShell: Shell, private val bag: Bag, private v
         enableDisableActions()
     }
 
+    /**
+     * Creates a context menu for contacts.
+     * 
+     * @param parent The parent control for the context menu.
+     * @return The created context menu.
+     */
     private fun createContactContextMenu(parent: Control): Menu {
         val menuMgr = MenuManager()
         contactActions.forEach { menuMgr.add(it) }
         return menuMgr.createContextMenu(parent)
     }
 
+    /**
+     * Creates a context menu for attachments.
+     * 
+     * @param parent The parent control for the context menu.
+     * @return The created context menu.
+     */
     private fun createAttachmentContextMenu(parent: Control): Menu {
         val menuMgr = MenuManager()
         menuMgr.add(saveAttachmentAction)
@@ -368,12 +411,20 @@ internal class ComposeDialog(parentShell: Shell, private val bag: Bag, private v
         return menuMgr.createContextMenu(parent)
     }
 
+    /**
+     * Enables or disables attachment actions based on attachment availability and read-only mode.
+     */
     private fun enableDisableActions() {
         val hasAttachments = message.attachments.isNotEmpty()
         saveAttachmentAction.isEnabled = hasAttachments
         deleteAttachmentAction.isEnabled = hasAttachments and !readOnly
     }
 
+    /**
+     * Fills the email message with the content from the dialog.
+     * 
+     * @param drafted True if the message is being saved as a draft, false if it's being sent.
+     */
     private fun fillMessage(drafted: Boolean) {
         var subject = subjectText.text.trim()
         if (subject.isEmpty()) {
@@ -389,6 +440,13 @@ internal class ComposeDialog(parentShell: Shell, private val bag: Bag, private v
         message.drafted = drafted
     }
 
+    /**
+     * Reads the content of a file and returns it as a byte array.
+     * 
+     * @param file The file to read.
+     * @return The content of the file as a byte array.
+     * @throws IOException If an I/O error occurs while reading the file.
+     */
     @Throws(IOException::class)
     private fun getContentBytes(file: File): ByteArray {
         FileInputStream(file).use { inputStream ->
@@ -403,7 +461,13 @@ internal class ComposeDialog(parentShell: Shell, private val bag: Bag, private v
         }
     }
 
+    /**
+     * Represents an action for adding a contact to the email.
+     */
     private inner class ContactAction(private val email: String, text: String) : Action(text) {
+        /**
+         * Runs the action to add the contact to the email.
+         */
         override fun run() {
             if (contactMenu.getData() is Text) {
                 val addressText = contactMenu.getData() as Text
@@ -422,7 +486,13 @@ internal class ComposeDialog(parentShell: Shell, private val bag: Bag, private v
         }
     }
 
+    /**
+     * Represents an action for saving an attachment.
+     */
     private inner class SaveAttachmentAction : Action(I18n.getString("compose_save_attachment_action")) {
+        /**
+         * Runs the action to save the selected attachment.
+         */
         override fun run() {
             val index = attachmentList.selectionIndex
             val attachment = message.attachments[index]
@@ -448,7 +518,13 @@ internal class ComposeDialog(parentShell: Shell, private val bag: Bag, private v
         }
     }
 
+    /**
+     * Represents an action for deleting an attachment.
+     */
     private inner class DeleteAttachmentAction : Action(I18n.getString("compose_delete_attachment_action")) {
+        /**
+         * Runs the action to delete the selected attachment.
+         */
         override fun run() {
             var index = attachmentList.selectionIndex
             message.attachments.removeAt(index)

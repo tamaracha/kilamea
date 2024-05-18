@@ -65,6 +65,16 @@ import com.github.kilamea.swt.MessageDialog
 import com.github.kilamea.util.FileUtils
 import com.github.kilamea.util.SystemUtils
 
+/**
+ * Represents the main application window for Kilamea.
+ * 
+ * @since 0.1.0
+ * @property bag The bag containing various application data.
+ * @property comparatorPool The pool managing comparators for sorting.
+ * @property context The initial context of the application.
+ * @property database The database manager instance.
+ * @property dbException The database runtime exception, if any.
+ */
 class Kilamea : ApplicationWindow {
     private lateinit var mailboxAccLabel: Label
     private lateinit var mailboxViewer: TreeViewer
@@ -111,6 +121,11 @@ class Kilamea : ApplicationWindow {
     private var focusedFolder: Folder? = null
     private var focusedMessage: Message? = null
 
+    /**
+     * Constructs the main application window with the initial context.
+     * 
+     * @param initialContext The initial context of the application.
+     */
     constructor(initialContext: Context) : super(null) {
         bag = Bag()
         context = initialContext
@@ -123,11 +138,22 @@ class Kilamea : ApplicationWindow {
         addMenuBar()
     }
 
+    /**
+     * Configures the shell with the application name.
+     * 
+     * @param newShell The shell to be configure.
+     */
     override fun configureShell(newShell: Shell) {
         super.configureShell(newShell)
         newShell.text = Constants.APP_NAME
     }
 
+    /**
+     * Creates the contents of the application window.
+     * 
+     * @param parent The parent composite.
+     * @return The control representing the contents.
+     */
     override fun createContents(parent: Composite): Control {
         val container = Composite(parent, SWT.NONE)
         container.layout = GridLayout()
@@ -345,6 +371,11 @@ class Kilamea : ApplicationWindow {
         return container
     }
 
+    /**
+     * Creates the menu manager and sets up the menu structure.
+     * 
+     * @return The created menu manager.
+     */
     override fun createMenuManager(): MenuManager {
         val menuMgr = MenuManager()
 
@@ -406,12 +437,22 @@ class Kilamea : ApplicationWindow {
         return menuMgr
     }
 
+    /**
+     * Closes the application window and disconnects from the database.
+     * 
+     * @return true if the window is closed successfully, false otherwise.
+     */
     override fun close(): Boolean {
         disconnectDatabase()
 
         return super.close()
     }
 
+    /**
+     * Opens the application window. If there is a database exception, an error message is displayed.
+     * 
+     * @return The result of the open operation.
+     */
     override fun open(): Int {
         dbException?.let { ex ->
             MessageDialog.openError(ex.message ?: "")
@@ -421,16 +462,27 @@ class Kilamea : ApplicationWindow {
         return super.open()
     }
 
+    /**
+     * Runs the application and disposing the display after closing.
+     */
     fun run() {
         setBlockOnOpen(true)
         open()
         Display.getCurrent().dispose()
     }
 
+    /**
+     * Retrieves the display associated with the shell.
+     * 
+     * @return The display associated with the shell.
+     */
     private fun getDisplay(): Display {
         return shell.display
     }
 
+    /**
+     * Prepares the application by setting up the initial state and selections.
+     */
     private fun prepare() {
         val treeItem = bag.findLastMailboxEntry()
         if (treeItem != null) {
@@ -455,6 +507,9 @@ class Kilamea : ApplicationWindow {
         }
     }
 
+    /**
+     * Creates and initializes the actions for the application.
+     */
     private fun createActions() {
         fileOpenAction = FileOpenAction()
         fileSaveAsAction = FileSaveAsAction()
@@ -486,6 +541,9 @@ class Kilamea : ApplicationWindow {
         createViewSortActions()
     }
 
+    /**
+     * Creates and initializes the file receive actions based on the number of accounts.
+     */
     private fun createFileReceiveActions() {
         val actionCount = bag.accounts.size + 2
         fileReceiveActions = arrayOfNulls<FileReceiveAction>(actionCount)
@@ -500,6 +558,9 @@ class Kilamea : ApplicationWindow {
         }
     }
 
+    /**
+     * Creates and initializes the view sort actions for sorting messages.
+     */
     private fun createViewSortActions() {
         viewSortFieldActions = arrayOf(
             ViewSortFieldAction(MenuFactory.getText("view_sort_from_addresses"), SortField.FromAddresses),
@@ -515,6 +576,12 @@ class Kilamea : ApplicationWindow {
         )
     }
 
+    /**
+     * Creates the context menu for the mailbox tree.
+     * 
+     * @param parent The parent control to attach the context menu to.
+     * @return The created context menu.
+     */
     private fun createMailboxContextMenu(parent: Control): Menu {
         val menuMgr = MenuManager()
         menuMgr.add(fileNewFolderAction)
@@ -526,6 +593,12 @@ class Kilamea : ApplicationWindow {
         return menuMgr.createContextMenu(parent)
     }
 
+    /**
+     * Creates the context menu for the message table.
+     * 
+     * @param parent The parent control to attach the context menu to.
+     * @return The created context menu.
+     */
     private fun createMessageContextMenu(parent: Control): Menu {
         val menuMgr = MenuManager()
         menuMgr.add(messageNewAction)
@@ -541,6 +614,9 @@ class Kilamea : ApplicationWindow {
         return menuMgr.createContextMenu(parent)
     }
 
+    /**
+     * Enables or disables actions based on the current state of the application.
+     */
     private fun enableDisableActions() {
         val hasAccounts = bag.accounts.isNotEmpty()
         var hasMessages = false
@@ -581,12 +657,18 @@ class Kilamea : ApplicationWindow {
         messageDeleteAction.isEnabled = hasMessages
     }
 
+    /**
+     * Updates the file receive menu with the current file receive actions.
+     */
     private fun updateFileReceiveMenu() {
         fileReceiveMenu.removeAll()
         fileReceiveActions.forEach { fileReceiveMenu.add(it) }
         fileReceiveMenu.updateAll(true)
     }
 
+    /**
+     * Connects to the database and loads initial data.
+     */
     private fun connectDatabase() {
         val databaseFile = context.databaseFile
         try {
@@ -599,6 +681,9 @@ class Kilamea : ApplicationWindow {
         }
     }
 
+    /**
+     * Disconnects from the database and saves current state.
+     */
     private fun disconnectDatabase() {
         try {
             database.saveOptions(bag)
@@ -608,6 +693,15 @@ class Kilamea : ApplicationWindow {
         }
     }
 
+    /**
+     * Creates a new message and opens the compose dialog.
+     * 
+     * @param fromAddressesParam The sender addresses.
+     * @param recipientsParam The recipient addresses.
+     * @param subjectParam The subject for the message.
+     * @param contentParam The content for the message.
+     * @param attachmentsParam The attachments for the message.
+     */
     private fun createNewMessage(
         fromAddressesParam: String,
         recipientsParam: String,
@@ -648,6 +742,9 @@ class Kilamea : ApplicationWindow {
         }
     }
 
+    /**
+     * Sorts all messages in all folders based on the current comparator.
+     */
     private fun sortAllMessages() {
         val comparator = comparatorPool.getComparator(Message::class.java)
         if (comparator != null && comparator is FieldComparator) {
@@ -662,6 +759,13 @@ class Kilamea : ApplicationWindow {
         }
     }
 
+    /**
+     * Stores a message in the specified folder.
+     * 
+     * @param message The message to store.
+     * @param targetFolder The target folder to store the message in.
+     * @return True if the message was successfully stored, false otherwise.
+     */
     private fun storeMessage(message: Message, targetFolder: Folder?): Boolean {
         var result = false
 

@@ -23,6 +23,13 @@ import com.github.kilamea.i18n.I18n
 import com.github.kilamea.swt.MessageDialog
 import com.github.kilamea.swt.ModalDialog
 
+/**
+ * Represents a dialog for managing contacts, including adding, editing, and deleting contacts.
+ * 
+ * @since 0.1.0
+ * @property bag The Bag object containing the contact information.
+ * @property database The database manager for handling database operations.
+ */
 internal class ContactDialog(parentShell: Shell, private val bag: Bag, private val database: DatabaseManager) :
     ModalDialog(parentShell, emptyArray<String>()), IFormValidator {
 
@@ -40,6 +47,11 @@ internal class ContactDialog(parentShell: Shell, private val bag: Bag, private v
     private var contact: Contact? = null
     private var isNew: Boolean = false
 
+    /**
+     * Configures the shell (window) settings for the dialog.
+     * 
+     * @param newShell The shell to configure.
+     */
     override fun configureShell(newShell: Shell) {
         super.configureShell(newShell)
         newShell.text = I18n.getString("contact_window_title")
@@ -50,6 +62,12 @@ internal class ContactDialog(parentShell: Shell, private val bag: Bag, private v
         })
     }
 
+    /**
+     * Creates the main content area of the dialog.
+     * 
+     * @param parent The parent composite in which the dialog area is created.
+     * @return The control representing the dialog area.
+     */
     override fun createDialogArea(parent: Composite): Control {
         val container = super.createDialogArea(parent) as Composite
         val gridLayout = container.layout as GridLayout
@@ -130,6 +148,11 @@ internal class ContactDialog(parentShell: Shell, private val bag: Bag, private v
         return container
     }
 
+    /**
+     * Validates the input fields to ensure they are not empty and that the email address is unique.
+     * 
+     * @return true if the validation passes, false otherwise.
+     */
     override fun validate(): Boolean {
         var value = emailCombo.text.trim()
         emailCombo.text = value
@@ -166,6 +189,9 @@ internal class ContactDialog(parentShell: Shell, private val bag: Bag, private v
         return true
     }
 
+    /**
+     * Fills the email combo box with contact emails from the bag.
+     */
     private fun fillCombo() {
         emailCombo.removeAll()
         var selectionIndex = -1
@@ -191,6 +217,11 @@ internal class ContactDialog(parentShell: Shell, private val bag: Bag, private v
         }
     }
 
+    /**
+     * Selects a contact from the list based on the given index.
+     * 
+     * @param index The index of the contact to select.
+     */
     private fun selectContact(index: Int) {
         isNew = false
         contact = bag.contacts[index]
@@ -198,12 +229,18 @@ internal class ContactDialog(parentShell: Shell, private val bag: Bag, private v
         deleteButton.isEnabled = true
     }
 
+    /**
+     * Displays the selected contact's details in the form.
+     */
     private fun showContact() {
         emailCombo.text = contact?.email ?: ""
         firstNameText.text = contact?.firstName ?: ""
         lastNameText.text = contact?.lastName ?: ""
     }
 
+    /**
+     * Creates a new contact and displays its details in the form.
+     */
     private fun newContact() {
         isNew = true
         contact = Contact()
@@ -214,6 +251,9 @@ internal class ContactDialog(parentShell: Shell, private val bag: Bag, private v
         }
     }
 
+    /**
+     * Saves the current contact details to the database.
+     */
     private fun saveContact() {
         if (validate()) {
             contact?.apply {
@@ -237,6 +277,9 @@ internal class ContactDialog(parentShell: Shell, private val bag: Bag, private v
         }
     }
 
+    /**
+     * Deletes the current contact from the database.
+     */
     private fun deleteContact() {
         try {
             contact?.let {

@@ -15,7 +15,7 @@ Of course, anyone not affected can also use the software with pleasure. Everythi
 
 ## Future goals
 
+- Access to Gmail
 - Integration of rich text editor
 - Spellcheck capability
 - Implementation of spam filter
-- Automatic update function

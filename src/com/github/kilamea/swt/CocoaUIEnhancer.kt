@@ -10,7 +10,19 @@ import org.eclipse.swt.widgets.Listener
 import org.eclipse.swt.widgets.Menu
 import org.eclipse.swt.widgets.MenuItem
 
+/**
+ * Enhances the Cocoa UI by hooking application menu actions.
+ * 
+ * @since 0.1.0
+ */
 object CocoaUIEnhancer {
+    /**
+     * Hooks the application menu to the provided actions for about, preferences, and exit.
+     * 
+     * @param aboutAction The action to run when the about menu item is selected.
+     * @param prefsAction The action to run when the preferences menu item is selected.
+     * @param exitAction The action to run when the exit menu item is selected.
+     */
     fun hookApplicationMenu(aboutAction: IAction?, prefsAction: IAction?, exitAction: IAction?) {
         val display = Display.getCurrent()
 
