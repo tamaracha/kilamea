@@ -10,8 +10,6 @@ import java.io.UnsupportedEncodingException
 import java.net.URLDecoder
 import java.nio.charset.Charset
 import java.nio.charset.StandardCharsets
-import java.text.SimpleDateFormat
-import java.util.Date
 import java.util.stream.Collectors
 
 /**
@@ -20,56 +18,6 @@ import java.util.stream.Collectors
  * @since 0.1.0
  */
 object FileUtils {
-    private val INVALID_FILE_NAME_CHARS = charArrayOf('\\', '/', ':', '"', '<', '>', '|', '\b', '\u0000', '\t',
-        '\u0010', '\u0011', '\u0012', '\u0014', '\u0015', '\u0016', '\u0017', '\u0018', '\u0019')
-
-    /**
-     * Deletes a directory or file.
-     *
-     * @param file The file or directory to delete.
-     * @return True if the file or directory was deleted, false otherwise.
-     */
-    fun deleteDirectoryOrFile(file: File): Boolean {
-        if (!file.exists()) {
-            return true
-        }
-
-        if (file.isDirectory) {
-            for (entry in file.listFiles() ?: emptyArray()) {
-                if (!deleteDirectoryOrFile(entry)) {
-                    return false
-                }
-            }
-        }
-
-        return file.delete()
-    }
-
-    /**
-     * Formats a file size in a human-readable format.
-     *
-     * @param value The file size in bytes.
-     * @return The formatted file size as a string.
-     */
-    fun formatFileSize(value: Long): String {
-        return when {
-            value >= 1024L && value < 1048576L -> String.format("%.1f KB", value / 1024.0)
-            value > 1048576L -> String.format("%.1f MB", value / 1048576.0)
-            else -> "$value Bytes"
-        }
-    }
-
-    /**
-     * Formats the last modified date of a file.
-     *
-     * @param file The file whose last modified date to format.
-     * @return The formatted last modified date as a string.
-     */
-    fun formatLastModified(file: File): String {
-        val sdf = SimpleDateFormat("yyyy-MM-dd")
-        return sdf.format(Date(file.lastModified()))
-    }
-
     /**
      * Gets the application data folder.
      *
@@ -86,33 +34,6 @@ object FileUtils {
             }
             path
         }
-    }
-
-    /**
-     * Gets the size of a directory or file.
-     *
-     * @param file The file or directory.
-     * @param recursive Whether to include subdirectories recursively.
-     * @return The size in bytes.
-     */
-    fun getDirectoryOrFileSize(file: File, recursive: Boolean): Long {
-        var size = 0L
-
-        if (file.isDirectory) {
-            for (entry in file.listFiles() ?: emptyArray()) {
-                if (entry.isDirectory) {
-                    if (recursive) {
-                        size += getDirectoryOrFileSize(entry, recursive)
-                    }
-                } else {
-                    size += entry.length()
-                }
-            }
-        } else {
-            size = file.length()
-        }
-
-        return size
     }
 
     /**
@@ -208,38 +129,6 @@ object FileUtils {
     }
 
     /**
-     * Checks if a directory is empty.
-     *
-     * @param file The directory.
-     * @return True if the directory is empty, false otherwise.
-     */
-    fun isEmptyDirectory(file: File): Boolean {
-        return file.isDirectory && getDirectoryOrFileSize(file, true) == 0L
-    }
-
-    /**
-     * Checks if a filename is valid by looking for invalid characters.
-     *
-     * @param value The filename.
-     * @return A string containing invalid characters found in the filename.
-     */
-    fun isValidFilename(value: String): String {
-        var badCharacters = ""
-
-        for (i in 0 until value.length) {
-            val c = value[i]
-            for (element in INVALID_FILE_NAME_CHARS) {
-                if (c == element) {
-                    badCharacters += c
-                    break
-                }
-            }
-        }
-
-        return badCharacters
-    }
-
-    /**
      * Reads all lines from a file.
      *
      * @param file The file to read.
@@ -267,32 +156,6 @@ object FileUtils {
         inputStream.bufferedReader(charset).use { reader ->
             return reader.lines().collect(Collectors.joining("\n"))
         }
-    }
-
-    /**
-     * Removes invalid characters from a filename.
-     *
-     * @param value The filename.
-     * @return The filename with invalid characters removed.
-     */
-    fun removeInvalidChars(value: String): String {
-        var newValue = ""
-
-        for (i in 0 until value.length) {
-            val c = value[i]
-            var matches = false
-            for (element in INVALID_FILE_NAME_CHARS) {
-                if (c == element) {
-                    matches = true
-                    break
-                }
-            }
-            if (!matches) {
-                newValue += c
-            }
-        }
-
-        return newValue
     }
 
     /**

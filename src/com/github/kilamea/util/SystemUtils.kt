@@ -82,20 +82,4 @@ object SystemUtils {
             runtime.exec(arrayOf("sh", "-c", cmd.toString()))
         }
     }
-
-    /**
-     * Shuts down the system.
-     *
-     * @throws IOException If an I/O error occurs.
-     */
-    @Throws(IOException::class)
-    fun shutdown() {
-        val runtime = Runtime.getRuntime()
-
-        if (isWindows()) {
-            runtime.exec("shutdown.exe -s -t 0")
-        } else {
-            runtime.exec("shutdown -h now")
-        }
-    }
 }
