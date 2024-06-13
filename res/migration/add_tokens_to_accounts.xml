@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.0.xsd">
+
+    <changeSet id="add_tokens_to_accounts" author="kschroeer">
+        <addColumn tableName="accounts">
+            <column name="tokens" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="set_empty_tokens_for_existing_accounts" author="kschroeer">
+        <sql>UPDATE accounts SET tokens = '' WHERE tokens IS NULL;</sql>
+    </changeSet>
+
+</databaseChangeLog>

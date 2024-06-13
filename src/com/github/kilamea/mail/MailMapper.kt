@@ -1,7 +1,7 @@
-package com.github.kilamea.core
+package com.github.kilamea.mail
 
+import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
-import java.io.InputStream
 import java.io.IOException
 import java.io.UnsupportedEncodingException
 import java.nio.charset.StandardCharsets
@@ -10,11 +10,8 @@ import java.util.Base64
 import java.util.Date
 import java.util.stream.Collectors
 
-import javax.activation.DataHandler
-import javax.activation.DataSource
 import javax.mail.Address
 import javax.mail.BodyPart
-import javax.mail.Message as Email
 import javax.mail.MessagingException
 import javax.mail.Part
 import javax.mail.Session
@@ -23,12 +20,13 @@ import javax.mail.internet.InternetAddress
 import javax.mail.internet.MimeBodyPart
 import javax.mail.internet.MimeMessage
 import javax.mail.internet.MimeMultipart
-import javax.mail.internet.MimeUtility
-import javax.mail.util.ByteArrayDataSource
 
+import com.github.kilamea.core.Constants
 import com.github.kilamea.entity.Attachment
 import com.github.kilamea.entity.AttachmentList
 import com.github.kilamea.entity.Message
+import com.github.kilamea.util.equalsIgnoreCase
+import com.google.api.services.gmail.model.Message as GmailMessage
 
 /**
  * Utility object for mapping email-related data.
@@ -37,15 +35,15 @@ import com.github.kilamea.entity.Message
  */
 internal object MailMapper {
     /**
-     * Maps a MimeMessage to a Message object.
+     * Maps a `MimeMessage` to a `Message` object.
      *
-     * @param email The MimeMessage to map.
-     * @return The mapped Message object.
+     * @param email The `MimeMessage` to map.
+     * @return The mapped `Message` object.
      * @throws IOException If an I/O error occurs.
      * @throws MessagingException If a messaging error occurs.
      */
     @Throws(IOException::class, MessagingException::class)
-    fun map(email: MimeMessage): Message {
+    fun mapMimeMessageToMessage(email: MimeMessage): Message {
         val newMessage = Message()
 
         val emailReference = email.getMessageID()
@@ -54,10 +52,10 @@ internal object MailMapper {
         val fromAddresses = collectAddresses(email.getFrom())
         newMessage.fromAddresses = fromAddresses
 
-        val recipients = collectAddresses(email.getRecipients(Email.RecipientType.TO))
+        val recipients = collectAddresses(email.getRecipients(MimeMessage.RecipientType.TO))
         newMessage.recipients = recipients
 
-        val ccAddresses = collectAddresses(email.getRecipients(Email.RecipientType.CC))
+        val ccAddresses = collectAddresses(email.getRecipients(MimeMessage.RecipientType.CC))
         newMessage.ccAddresses = ccAddresses
 
         val sentDate = email.getSentDate() ?: Date()
@@ -76,35 +74,54 @@ internal object MailMapper {
             newMessage.content = content as String
         }
 
-        newMessage.rawData = emailToString(email)
+        newMessage.rawData = getRawData(email)
 
         return newMessage
     }
 
     /**
-     * Maps a Message object to a MimeMessage.
+     * Maps a `GmailMessage` to a `Message` object.
      *
+     * @param email The `GmailMessage` to map.
      * @param session The email session to use.
-     * @param message The Message object to map.
-     * @return The mapped MimeMessage.
+     * @return The mapped `Message` object.
      * @throws IOException If an I/O error occurs.
      * @throws MessagingException If a messaging error occurs.
      */
     @Throws(IOException::class, MessagingException::class)
-    fun map(session: Session, message: Message): MimeMessage {
+    fun mapGmailMessageToMessage(email: GmailMessage, session: Session): Message {
+        val rawMessageBytes = Base64.getUrlDecoder().decode(email.raw)
+        val decodedString = String(rawMessageBytes)
+        val mimeMessage = MimeMessage(session, ByteArrayInputStream(decodedString.toByteArray()))
+
+        val newMessage = mapMimeMessageToMessage(mimeMessage)
+        return newMessage
+    }
+
+    /**
+     * Maps a `Message` object to a `MimeMessage`.
+     *
+     * @param message The `Message` object to map.
+     * @param session The email session to use.
+     * @return The mapped `MimeMessage`.
+     * @throws IOException If an I/O error occurs.
+     * @throws MessagingException If a messaging error occurs.
+     */
+    @Throws(IOException::class, MessagingException::class)
+    fun mapMessageToMimeMessage(message: Message, session: Session): MimeMessage {
         val newEmail = MimeMessage(session)
 
         try {
-            newEmail.setFrom(InternetAddress(message.fromAddresses))
+            newEmail.setFrom(parse(message.fromAddresses)[0])
 
-            newEmail.setRecipients(Email.RecipientType.TO, parse(message.recipients))
+            newEmail.setRecipients(MimeMessage.RecipientType.TO, parse(message.recipients))
 
             if (message.ccAddresses.isNotEmpty()) {
-                newEmail.setRecipients(Email.RecipientType.CC, parse(message.ccAddresses))
+                newEmail.setRecipients(MimeMessage.RecipientType.CC, parse(message.ccAddresses))
             }
 
             if (message.bccAddresses.isNotEmpty()) {
-                newEmail.setRecipients(Email.RecipientType.BCC, parse(message.bccAddresses))
+                newEmail.setRecipients(MimeMessage.RecipientType.BCC, parse(message.bccAddresses))
             }
         } catch (e: AddressException) {
             throw MessagingException(e.message ?: "")
@@ -112,8 +129,8 @@ internal object MailMapper {
             throw MessagingException(e.message ?: "")
         }
 
-        newEmail.setSubject(message.subject)
         newEmail.setSentDate(message.sentDate)
+        newEmail.setSubject(message.subject)
         newEmail.setHeader("User-Agent", Constants.APP_NAME)
 
         if (message.attachments.isEmpty()) {
@@ -126,25 +143,48 @@ internal object MailMapper {
     }
 
     /**
-     * Converts a MimeMessage to its raw string representation.
+     * Maps a `Message` object to a `GmailMessage`.
      *
-     * @param email The MimeMessage to convert.
-     * @return The string representation of the MimeMessage.
+     * @param message The `Message` object to map.
+     * @param session The email session to use.
+     * @return The mapped `GmailMessage`.
      * @throws IOException If an I/O error occurs.
      * @throws MessagingException If a messaging error occurs.
      */
     @Throws(IOException::class, MessagingException::class)
-    private fun emailToString(email: MimeMessage): String {
+    fun mapMessageToGmailMessage(message: Message, session: Session): GmailMessage {
+        val mimeMessage = mapMessageToMimeMessage(message, session)
+        val outputStream = ByteArrayOutputStream()
+        mimeMessage.writeTo(outputStream)
+        val rawMessageBytes = outputStream.toByteArray()
+        val encodedString = Base64.getEncoder().encodeToString(rawMessageBytes)
+
+        val newEmail = GmailMessage()
+        newEmail.raw = encodedString
+
+        return newEmail
+    }
+
+    /**
+     * Converts a `MimeMessage` to its raw string representation.
+     *
+     * @param email The `MimeMessage` to convert.
+     * @return The string representation of the `MimeMessage`.
+     * @throws IOException If an I/O error occurs.
+     * @throws MessagingException If a messaging error occurs.
+     */
+    @Throws(IOException::class, MessagingException::class)
+    private fun getRawData(email: MimeMessage): String {
         val outputStream = ByteArrayOutputStream()
         email.writeTo(outputStream)
         return outputStream.toString()
     }
 
     /**
-     * Extracts content from a MimeMultipart object and sets it in the given Message object.
+     * Extracts content from a `MimeMultipart` object and sets it in the given `Message` object.
      *
-     * @param multipart The MimeMultipart to extract content from.
-     * @param message The Message object to set the extracted content.
+     * @param multipart The `MimeMultipart` to extract content from.
+     * @param message The `Message` object to set the extracted content.
      * @throws IOException If an I/O error occurs.
      * @throws MessagingException If a messaging error occurs.
      */
@@ -157,17 +197,10 @@ internal object MailMapper {
         for (i in 0 until count) {
             val bodyPart = multipart.getBodyPart(i)
             val disposition = bodyPart.disposition
-            if ((disposition == null || disposition.equals(Part.ATTACHMENT, ignoreCase = true))
+            if ((disposition == null || disposition.equalsIgnoreCase(Part.ATTACHMENT))
                 && bodyPart.fileName != null
             ) {
-                val contentBytes = getContentBytes(bodyPart)
-                val base64Content = Base64.getEncoder().encodeToString(contentBytes)
-                val attachment = Attachment().apply {
-                    content = base64Content
-                    fileName = MimeUtility.decodeText(bodyPart.fileName)
-                    this.message = message
-                }
-                message.attachments.add(attachment)
+                AttachmentConverter.convert(bodyPart, message)
             } else {
                 val content = bodyPart.content
                 if (bodyPart.isMimeType(MimeType.TEXT_PLAIN.toString())) {
@@ -188,9 +221,9 @@ internal object MailMapper {
     }
 
     /**
-     * Adds text content and attachments to a MimeMessage.
+     * Adds text content and attachments to a `MimeMessage`.
      *
-     * @param email The MimeMessage to add content and attachments.
+     * @param email The `MimeMessage` to add content and attachments.
      * @param text The text content to add.
      * @param attachments The attachments to add.
      * @throws IOException If an I/O error occurs.
@@ -205,12 +238,7 @@ internal object MailMapper {
         multipart.addBodyPart(textPart)
 
         for (attachment in attachments) {
-            val attachmentPart = MimeBodyPart()
-            val decodedBytes = Base64.getDecoder().decode(attachment.content)
-            val dataSource = ByteArrayDataSource(decodedBytes, "application/octet-stream")
-            attachmentPart.dataHandler = DataHandler(dataSource)
-            attachmentPart.fileName = attachment.fileName
-            multipart.addBodyPart(attachmentPart)
+            AttachmentConverter.convert(multipart, attachment)
         }
 
         email.setContent(multipart)
@@ -248,50 +276,28 @@ internal object MailMapper {
     }
 
     /**
-     * Reads the content of a BodyPart as a byte array.
-     *
-     * @param bodyPart The BodyPart to read content from.
-     * @return The content of the BodyPart as a byte array.
-     * @throws IOException If an I/O error occurs.
-     * @throws MessagingException If a messaging error occurs.
-     */
-    @Throws(IOException::class, MessagingException::class)
-    private fun getContentBytes(bodyPart: BodyPart): ByteArray {
-        bodyPart.inputStream.use { inputStream ->
-            ByteArrayOutputStream().use { outputStream ->
-                val buffer = ByteArray(4096)
-                var bytesRead: Int
-                while (inputStream.read(buffer).also { bytesRead = it } != -1) {
-                    outputStream.write(buffer, 0, bytesRead)
-                }
-                return outputStream.toByteArray()
-            }
-        }
-    }
-
-    /**
-     * Parses a string of recipient email addresses into an array of InternetAddress objects.
+     * Parses a string of email addresses into an array of `InternetAddress` objects.
      * 
-     * @param recipients A string containing recipient email addresses, separated by commas or semicolons.
-     * @return An array of InternetAddress objects.
+     * @param addresses A string containing email addresses, separated by commas or semicolons.
+     * @return An array of `InternetAddress` objects.
      * @throws AddressException If any of the addresses are invalid.
      * @throws UnsupportedEncodingException If the encoding is not supported.
      */
     @Throws(AddressException::class, UnsupportedEncodingException::class)
-    private fun parse(recipients: String): Array<InternetAddress> {
-        val encodedRecipients = StringBuilder()
-        var recipientsList = recipients.replace(";", ",")
+    private fun parse(addresses: String): Array<InternetAddress> {
+        val encodedAddresses = StringBuilder()
+        var addressesList = addresses.replace(";", ",")
 
-        for (recipient in recipientsList.split(",")) {
-            val address = InternetAddress(recipient.trim())
-            address.setPersonal(address.personal, StandardCharsets.UTF_8.name())
-            encodedRecipients.append(address.toString()).append(",")
+        for (address in addressesList.split(",")) {
+            val iaddr = InternetAddress(address.trim())
+            iaddr.setPersonal(iaddr.personal, StandardCharsets.UTF_8.name())
+            encodedAddresses.append(iaddr.toString()).append(",")
         }
 
-        if (encodedRecipients.length > 0) {
-            encodedRecipients.setLength(encodedRecipients.length - 1)
+        if (encodedAddresses.length > 0) {
+            encodedAddresses.setLength(encodedAddresses.length - 1)
         }
 
-        return InternetAddress.parse(encodedRecipients.toString(), true)
+        return InternetAddress.parse(encodedAddresses.toString(), true)
     }
 }

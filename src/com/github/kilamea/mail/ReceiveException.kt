@@ -1,4 +1,4 @@
-package com.github.kilamea.core
+package com.github.kilamea.mail
 
 /**
  * Exception thrown when an error occurs while receiving emails.

@@ -1,7 +1,7 @@
 package com.github.kilamea.entity
 
-import com.github.kilamea.core.MailProtocol
 import com.github.kilamea.i18n.I18n
+import com.github.kilamea.mail.MailProtocol
 
 /**
  * Represents an email account with its settings and folders.
@@ -11,6 +11,7 @@ import com.github.kilamea.i18n.I18n
  * @property displayName The name associated with the account.
  * @property user The username for authentication.
  * @property password The password for authentication.
+ * @property tokens The access and refresh token for authentication.
  * @property protocol The mail protocol used (e.g., IMAP or POP3).
  * @property sslActive Indicates if SSL is active.
  * @property incomingHost The host for incoming mail.
@@ -25,6 +26,7 @@ class Account : AbstractEntity() {
     var displayName: String = ""
     var user: String = ""
     var password: String = ""
+    var tokens: String = ""
     var protocol: MailProtocol = MailProtocol.IMAP
     var sslActive: Boolean = true
     var incomingHost: String = ""
@@ -88,5 +90,16 @@ class Account : AbstractEntity() {
      */
     override fun toString(): String {
         return email
+    }
+
+    companion object {
+        /**
+         * Checks if the email address belongs to Gmail.
+         *
+         * @return True if the email address ends with "@gmail.com" or "@googlemail.com", otherwise false.
+         */
+        fun isGmail(string: String): Boolean {
+            return string.lowercase().endsWith("@gmail.com") || string.lowercase().endsWith("@googlemail.com")
+        }
     }
 }

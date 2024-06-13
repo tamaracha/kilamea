@@ -7,10 +7,10 @@ import java.sql.ResultSet
 import java.sql.SQLException
 import java.sql.Statement
 import java.util.Date
+import java.util.logging.Logger
 
 import com.github.kilamea.core.Bag
 import com.github.kilamea.core.Constants
-import com.github.kilamea.core.MailProtocol
 import com.github.kilamea.core.Options
 import com.github.kilamea.entity.Account
 import com.github.kilamea.entity.Attachment
@@ -19,6 +19,7 @@ import com.github.kilamea.entity.Folder
 import com.github.kilamea.entity.FolderType
 import com.github.kilamea.entity.Message
 import com.github.kilamea.i18n.I18n
+import com.github.kilamea.mail.MailProtocol
 import com.github.kilamea.util.PasswordCrypt
 import com.google.gson.Gson
 
@@ -36,11 +37,12 @@ import liquibase.database.jvm.JdbcConnection
  * @property connection The SQL connection to the database.
  */
 class DatabaseManager {
+    private val logger = Logger.getLogger(DatabaseManager::class.java.name)
     private var connection: Connection? = null
 
     private val SQL_SELECT_ACCOUNTS =
         "SELECT " +
-            "a.id AS accountId, a.email AS email, a.display_name AS displayName, a.user AS user, a.password AS password, " +
+            "a.id AS accountId, a.email AS email, a.display_name AS displayName, a.user AS user, a.password AS password, a.tokens AS tokens, " +
             "a.protocol AS mailProtocol, a.ssl_active AS sslActive, a.incoming_host AS incomingHost, a.incoming_port AS incomingPort, " +
             "a.outgoing_host AS outgoingHost, a.outgoing_port AS outgoingPort, " +
             "f.id AS folderId, f.name AS folderName, f.type AS folderType, " +
@@ -51,9 +53,11 @@ class DatabaseManager {
             "FROM accounts a INNER JOIN folders f ON a.id = f.account " +
             "LEFT JOIN messages m ON f.id = m.folder LEFT JOIN attachments t ON m.id = t.message"
     private val SQL_INSERT_ACCOUNT =
-        "INSERT INTO accounts (id, email, display_name, user, password, protocol, ssl_active, incoming_host, incoming_port, outgoing_host, outgoing_port) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+        "INSERT INTO accounts (id, email, display_name, user, password, tokens, protocol, ssl_active, incoming_host, incoming_port, outgoing_host, outgoing_port) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
     private val SQL_UPDATE_ACCOUNT =
-        "UPDATE accounts SET email = ?, display_name = ?, user = ?, password = ?, protocol = ?, ssl_active = ?, incoming_host = ?, incoming_port = ?, outgoing_host = ?, outgoing_port = ? WHERE id = ?"
+        "UPDATE accounts SET email = ?, display_name = ?, user = ?, password = ?, tokens = ?, protocol = ?, ssl_active = ?, incoming_host = ?, incoming_port = ?, outgoing_host = ?, outgoing_port = ? WHERE id = ?"
+    private val SQL_UPDATE_ACCOUNT_TOKENS =
+        "UPDATE accounts SET tokens = ? WHERE id = ?"
     private val SQL_DELETE_ACCOUNT =
         "DELETE FROM accounts WHERE id = ?"
 
@@ -110,9 +114,9 @@ class DatabaseManager {
             Class.forName(Constants.DATABASE_DRIVER_CLASS)
             val url = Constants.DATABASE_JDBC_SCHEME + correctedFileName
             connection = DriverManager.getConnection(url)
-            setForeignKeysPragma()
             runMigrations()
             connection?.autoCommit = true
+            setForeignKeysPragma()
         } catch (e: Exception) {
             throw DBRuntimeException(I18n.getString("database_connect_error"), e)
         }
@@ -150,12 +154,13 @@ class DatabaseManager {
                 ps.setString(3, account.displayName)
                 ps.setString(4, account.user)
                 ps.setString(5, encryptPassword(account.password))
-                ps.setInt(6, account.protocol.ordinal)
-                ps.setBoolean(7, account.sslActive)
-                ps.setString(8, account.incomingHost)
-                ps.setInt(9, account.incomingPort)
-                ps.setString(10, account.outgoingHost)
-                ps.setInt(11, account.outgoingPort)
+                ps.setString(6, account.tokens)
+                ps.setInt(7, account.protocol.ordinal)
+                ps.setBoolean(8, account.sslActive)
+                ps.setString(9, account.incomingHost)
+                ps.setInt(10, account.incomingPort)
+                ps.setString(11, account.outgoingHost)
+                ps.setInt(12, account.outgoingPort)
 
                 val affectedRows = ps.executeUpdate()
                 if (affectedRows > 0) {
@@ -292,18 +297,42 @@ class DatabaseManager {
                 ps.setString(2, account.displayName)
                 ps.setString(3, account.user)
                 ps.setString(4, encryptPassword(account.password))
-                ps.setInt(5, account.protocol.ordinal)
-                ps.setBoolean(6, account.sslActive)
-                ps.setString(7, account.incomingHost)
-                ps.setInt(8, account.incomingPort)
-                ps.setString(9, account.outgoingHost)
-                ps.setInt(10, account.outgoingPort)
-                ps.setString(11, account.id)
+                ps.setString(5, account.tokens)
+                ps.setInt(6, account.protocol.ordinal)
+                ps.setBoolean(7, account.sslActive)
+                ps.setString(8, account.incomingHost)
+                ps.setInt(9, account.incomingPort)
+                ps.setString(10, account.outgoingHost)
+                ps.setInt(11, account.outgoingPort)
+                ps.setString(12, account.id)
 
                 ps.executeUpdate()
             }
         } catch (e: SQLException) {
             throw DBRuntimeException(I18n.getString("database_add_or_update_account_error"), e)
+        }
+    }
+
+    /**
+     * Updates the access and refresh token for a given account in the database.
+     *
+     * @param id The ID of the account.
+     * @param tokens The new tokens to be set for the account.
+     * @throws DBRuntimeException If an error occurs while updating the account.
+     */
+    @Throws(DBRuntimeException::class)
+    fun updateAccountTokens(id: String, tokens: String) {
+        checkConnection()
+
+        try {
+            connection?.prepareStatement(SQL_UPDATE_ACCOUNT_TOKENS)?.use { ps ->
+                ps.setString(1, tokens)
+                ps.setString(2, id)
+
+                ps.executeUpdate()
+            }
+        } catch (e: SQLException) {
+            throw DBRuntimeException(I18n.getString("database_update_account_tokens_error"), e)
         }
     }
 
@@ -605,6 +634,7 @@ class DatabaseManager {
                                 displayName = rs.getString("displayName")
                                 user = rs.getString("user")
                                 password = decryptPassword(rs.getString("password"))
+                                tokens = rs.getString("tokens")
                                 protocol = MailProtocol.values()[rs.getInt("mailProtocol")]
                                 sslActive = rs.getBoolean("sslActive")
                                 incomingHost = rs.getString("incomingHost")
@@ -772,7 +802,9 @@ class DatabaseManager {
         val updateCommand = CommandScope(UpdateCommandStep.COMMAND_NAME.joinToString(" "))
         updateCommand.addArgumentValue(DbUrlConnectionArgumentsCommandStep.DATABASE_ARG, database)
         updateCommand.addArgumentValue(UpdateCommandStep.CHANGELOG_FILE_ARG, changeLogLocation)
+        logger.info("Starting database migrations with changelog: $changeLogLocation")
         updateCommand.execute()
+        logger.info("Database migrations completed.")
     }
 
     /**

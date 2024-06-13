@@ -19,6 +19,7 @@ import com.github.kilamea.i18n.I18n
 import com.github.kilamea.swt.Dimension
 import com.github.kilamea.swt.MessageDialog
 import com.github.kilamea.swt.ModalDialog
+import com.github.kilamea.util.equalsIgnoreCase
 
 /**
  * Represents a dialog for managing folders.
@@ -100,7 +101,7 @@ internal class FolderDialog(parentShell: Shell, private val folders: FolderList,
         }
 
         folders.forEach {
-            if (it != folder && it.name.equals(value, ignoreCase = true)) {
+            if (it != folder && it.name.equalsIgnoreCase(value)) {
                 nameText.setFocus()
                 MessageDialog.openError(I18n.getString("folder_exists_error"))
                 return false

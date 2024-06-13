@@ -19,14 +19,17 @@ import org.eclipse.swt.widgets.Shell
 import org.eclipse.swt.widgets.Text
 
 import com.github.kilamea.core.Bag
-import com.github.kilamea.core.MailProtocol
 import com.github.kilamea.database.DatabaseManager
 import com.github.kilamea.database.DBRuntimeException
 import com.github.kilamea.entity.Account
 import com.github.kilamea.i18n.I18n
+import com.github.kilamea.mail.AuthException
+import com.github.kilamea.mail.GmailClient
+import com.github.kilamea.mail.MailProtocol
 import com.github.kilamea.swt.MessageDialog
 import com.github.kilamea.swt.ModalDialog
 import com.github.kilamea.swt.NumberValidator
+import com.github.kilamea.util.equalsIgnoreCase
 
 /**
  * Represents a dialog for managing email accounts, including adding, editing, and deleting email accounts.
@@ -122,6 +125,18 @@ internal class AccountDialog(parentShell: Shell, private val bag: Bag, private v
         saveButton.addSelectionListener(object : SelectionAdapter() {
             override fun widgetSelected(event: SelectionEvent) {
                 saveAccount()
+
+                account?.let { account ->
+                    if (Account.isGmail(account.email)) {
+                        MessageDialog.openInformation(I18n.getString("account_gmail_note"))
+                        try {
+                            val client = GmailClient(account, database, bag.options)
+                            client.authorize()
+                        } catch (e: AuthException) {
+                            MessageDialog.openError(e.message ?: "")
+                        }
+                    }
+                }
             }
         })
 
@@ -130,8 +145,10 @@ internal class AccountDialog(parentShell: Shell, private val bag: Bag, private v
         deleteButton.text = I18n.getString("account_delete_button")
         deleteButton.addSelectionListener(object : SelectionAdapter() {
             override fun widgetSelected(event: SelectionEvent) {
-                deleteAccount()
-                emailCombo.setFocus()
+                if (MessageDialog.openConfirm(I18n.getString("confirm_delete_account")) == SWT.YES) {
+                    deleteAccount()
+                    emailCombo.setFocus()
+                }
             }
         })
 
@@ -150,12 +167,13 @@ internal class AccountDialog(parentShell: Shell, private val bag: Bag, private v
         })
         emailCombo.addFocusListener(object : FocusAdapter() {
             override fun focusLost(e: FocusEvent) {
+                val input = emailCombo.text.trim()
+
                 if (userText.text.isEmpty()) {
                     userText.text = emailCombo.text
                 }
 
                 if (incomingHostText.text.isEmpty() && outgoingHostText.text.isEmpty()) {
-                    val input = emailCombo.text.trim()
                     val atIndex = input.indexOf('@')
                     if (atIndex != -1) {
                         val textAfterAt = input.substring(atIndex + 1)
@@ -210,6 +228,14 @@ internal class AccountDialog(parentShell: Shell, private val bag: Bag, private v
                 val sslActive = sslActiveCheck.selection
                 val incomingPort = MailProtocol.values()[protocolList.selectionIndex].port(sslActive)
                 incomingPortText.text = incomingPort.toString()
+
+                val input = incomingHostText.text.trim()
+                val dotIndex = input.indexOf('.')
+                if (dotIndex != -1) {
+                    val textFromDot = input.substring(dotIndex)
+                    val incomingHostPrefix = if (protocolList.selectionIndex == 0) "imap" else "pop"
+                    incomingHostText.text = "$incomingHostPrefix$textFromDot"
+                }
             }
         })
 
@@ -284,7 +310,7 @@ internal class AccountDialog(parentShell: Shell, private val bag: Bag, private v
         }
 
         bag.accounts.forEach {
-            if (it != account && it.email.equals(value, ignoreCase = true)) {
+            if (it != account && it.email.equalsIgnoreCase(value)) {
                 emailCombo.setFocus()
                 MessageDialog.openError(I18n.getString("account_exists_error"))
                 return false
@@ -299,52 +325,61 @@ internal class AccountDialog(parentShell: Shell, private val bag: Bag, private v
             return false
         }
 
-        value = userText.text.trim()
-        userText.text = value
-        if (value.isEmpty()) {
-            userText.setFocus()
-            MessageDialog.openError(I18n.getString("account_no_user_error"))
-            return false
-        }
+        if (Account.isGmail(emailCombo.text)) {
+            userText.text = ""
+            passwordText.text = ""
+            incomingHostText.text = ""
+            incomingPortText.text = ""
+            outgoingHostText.text = ""
+            outgoingPortText.text = ""
+        } else {
+            value = userText.text.trim()
+            userText.text = value
+            if (value.isEmpty()) {
+                userText.setFocus()
+                MessageDialog.openError(I18n.getString("account_no_user_error"))
+                return false
+            }
 
-        value = passwordText.text.trim()
-        passwordText.text = value
-        if (value.isEmpty()) {
-            passwordText.setFocus()
-            MessageDialog.openError(I18n.getString("account_no_password_error"))
-            return false
-        }
+            value = passwordText.text.trim()
+            passwordText.text = value
+            if (value.isEmpty()) {
+                passwordText.setFocus()
+                MessageDialog.openError(I18n.getString("account_no_password_error"))
+                return false
+            }
 
-        value = incomingHostText.text.trim()
-        incomingHostText.text = value
-        if (value.isEmpty()) {
-            incomingHostText.setFocus()
-            MessageDialog.openError(I18n.getString("account_no_incoming_host_error"))
-            return false
-        }
+            value = incomingHostText.text.trim()
+            incomingHostText.text = value
+            if (value.isEmpty()) {
+                incomingHostText.setFocus()
+                MessageDialog.openError(I18n.getString("account_no_incoming_host_error"))
+                return false
+            }
 
-        value = incomingPortText.text.trim()
-        incomingPortText.text = value
-        if (value.isEmpty()) {
-            incomingPortText.setFocus()
-            MessageDialog.openError(I18n.getString("account_no_incoming_port_error"))
-            return false
-        }
+            value = incomingPortText.text.trim()
+            incomingPortText.text = value
+            if (value.isEmpty()) {
+                incomingPortText.setFocus()
+                MessageDialog.openError(I18n.getString("account_no_incoming_port_error"))
+                return false
+            }
 
-        value = outgoingHostText.text.trim()
-        outgoingHostText.text = value
-        if (value.isEmpty()) {
-            outgoingHostText.setFocus()
-            MessageDialog.openError(I18n.getString("account_no_outgoing_host_error"))
-            return false
-        }
+            value = outgoingHostText.text.trim()
+            outgoingHostText.text = value
+            if (value.isEmpty()) {
+                outgoingHostText.setFocus()
+                MessageDialog.openError(I18n.getString("account_no_outgoing_host_error"))
+                return false
+            }
 
-        value = outgoingPortText.text.trim()
-        outgoingPortText.text = value
-        if (value.isEmpty()) {
-            outgoingPortText.setFocus()
-            MessageDialog.openError(I18n.getString("account_no_outgoing_port_error"))
-            return false
+            value = outgoingPortText.text.trim()
+            outgoingPortText.text = value
+            if (value.isEmpty()) {
+                outgoingPortText.setFocus()
+                MessageDialog.openError(I18n.getString("account_no_outgoing_port_error"))
+                return false
+            }
         }
 
         return true
@@ -432,9 +467,13 @@ internal class AccountDialog(parentShell: Shell, private val bag: Bag, private v
                 protocol = MailProtocol.values()[protocolList.selectionIndex]
                 sslActive = sslActiveCheck.selection
                 incomingHost = incomingHostText.text
-                incomingPort = incomingPortText.text.toInt()
+                if (incomingPortText.text.isNotEmpty()) {
+                    incomingPort = incomingPortText.text.toInt()
+                }
                 outgoingHost = outgoingHostText.text
-                outgoingPort = outgoingPortText.text.toInt()
+                if (outgoingPortText.text.isNotEmpty()) {
+                    outgoingPort = outgoingPortText.text.toInt()
+                }
             }
 
             try {

@@ -3,7 +3,7 @@
   <headerType>gui</headerType>
   <outfile>Kilamea.exe</outfile>
   <jar>Kilamea.jar</jar>
-  <dontWrapJar>false</dontWrapJar>
+  <dontWrapJar>true</dontWrapJar>
   <errTitle>Kilamea</errTitle>
   <downloadUrl>http://java.com/download</downloadUrl>
   <cmdLine></cmdLine>
@@ -14,8 +14,19 @@
   <classPath>
     <mainClass>com.github.kilamea.Launcher</mainClass>
     <cp>lib/commons-lang3.jar</cp>
+    <cp>lib/google-api-client.jar</cp>
+    <cp>lib/google-api-services-gmail.jar</cp>
+    <cp>lib/google-http-client.jar</cp>
+    <cp>lib/google-http-client-jackson2.jar</cp>
+    <cp>lib/google-oauth-client.jar</cp>
+    <cp>lib/google-oauth-client-java6.jar</cp>
+    <cp>lib/google-oauth-client-jetty.jar</cp>
     <cp>lib/gson.jar</cp>
+    <cp>lib/jackson-core.jar</cp>
     <cp>lib/javax.mail.jar</cp>
+    <cp>lib/javax.servlet.jar</cp>
+    <cp>lib/jetty.jar</cp>
+    <cp>lib/jetty-util.jar</cp>
     <cp>lib/liquibase-core.jar</cp>
     <cp>lib/org.eclipse.core.commands.jar</cp>
     <cp>lib/org.eclipse.equinox.common.jar</cp>

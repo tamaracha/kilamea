@@ -4,5 +4,6 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.0.xsd">
 
     <include file="migration/initial_structure.xml"/>
+    <include file="migration/add_tokens_to_accounts.xml"/>
 
 </databaseChangeLog>

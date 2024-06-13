@@ -1,4 +1,4 @@
-package com.github.kilamea.core
+package com.github.kilamea.mail
 
 /**
  * Enum representing different MIME types.
@@ -7,8 +7,9 @@ package com.github.kilamea.core
  * @property value The string value of the MIME type.
  */
 enum class MimeType(private val value: String) {
-    TEXT_PLAIN("text/plain"),
-    TEXT_HTML("text/html");
+    APPLICATION_OCTET_STREAM("application/octet-stream"),
+    TEXT_HTML("text/html"),
+    TEXT_PLAIN("text/plain");
 
     /**
      * Returns the string value of the MIME type.

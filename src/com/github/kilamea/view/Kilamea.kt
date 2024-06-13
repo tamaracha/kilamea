@@ -1,6 +1,7 @@
 package com.github.kilamea.view
 
 import java.io.File
+import java.io.FileNotFoundException
 import java.io.IOException
 import java.io.PrintWriter
 import java.text.SimpleDateFormat
@@ -40,11 +41,8 @@ import org.eclipse.swt.widgets.Table
 import org.eclipse.swt.widgets.Tree
 
 import com.github.kilamea.core.Bag
-import com.github.kilamea.core.Client
 import com.github.kilamea.core.Constants
 import com.github.kilamea.core.Context
-import com.github.kilamea.core.ReceiveException
-import com.github.kilamea.core.SendException
 import com.github.kilamea.database.DatabaseManager
 import com.github.kilamea.database.DBRuntimeException
 import com.github.kilamea.entity.Account
@@ -55,6 +53,11 @@ import com.github.kilamea.entity.FolderType
 import com.github.kilamea.entity.Message
 import com.github.kilamea.entity.MessageList
 import com.github.kilamea.i18n.I18n
+import com.github.kilamea.mail.AttachmentConverter
+import com.github.kilamea.mail.ClientBuilder
+import com.github.kilamea.mail.DefaultClient
+import com.github.kilamea.mail.ReceiveException
+import com.github.kilamea.mail.SendException
 import com.github.kilamea.sort.ComparatorPool
 import com.github.kilamea.sort.FieldComparator
 import com.github.kilamea.sort.SortField
@@ -62,6 +65,7 @@ import com.github.kilamea.sort.SortOrder
 import com.github.kilamea.swt.CocoaUIEnhancer
 import com.github.kilamea.swt.FileChooser
 import com.github.kilamea.swt.MessageDialog
+import com.github.kilamea.util.equalsIgnoreCase
 import com.github.kilamea.util.FileUtils
 import com.github.kilamea.util.SystemUtils
 
@@ -110,6 +114,7 @@ class Kilamea : ApplicationWindow {
     private lateinit var toolsAccountAction: ToolsAccountAction
     private lateinit var toolsPrefsAction: ToolsPrefsAction
     private lateinit var helpAboutAction: HelpAboutAction
+    private lateinit var helpAppDataFolderAction: HelpAppDataFolderAction
 
     private val bag: Bag
     private val comparatorPool: ComparatorPool
@@ -429,6 +434,7 @@ class Kilamea : ApplicationWindow {
         if (!SystemUtils.isMac()) {
             val helpMenu = MenuManager(MenuFactory.getText("help_menu"))
             helpMenu.add(helpAboutAction)
+            helpMenu.add(helpAppDataFolderAction)
             menuMgr.add(helpMenu)
         }
 
@@ -500,6 +506,10 @@ class Kilamea : ApplicationWindow {
             }
         }
 
+        if (context.hasArguments()) {
+            messageNewAction.run()
+        }
+
         if (bag.options.retrieveOnStart) {
             if (fileReceiveActions.isNotEmpty()) {
                 fileReceiveActions[0]?.run()
@@ -536,6 +546,7 @@ class Kilamea : ApplicationWindow {
         toolsPrefsAction = ToolsPrefsAction()
 
         helpAboutAction = HelpAboutAction()
+        helpAppDataFolderAction = HelpAppDataFolderAction()
 
         createFileReceiveActions()
         createViewSortActions()
@@ -721,15 +732,34 @@ class Kilamea : ApplicationWindow {
             folder = folderDrafts
         }
 
+        if (context.hasArguments()) {
+            var file: File? = null
+            try {
+                for (fileName in context.arguments) {
+                    file = File(fileName)
+                    if (!file.exists()) {
+                        throw FileNotFoundException()
+                    }
+                    AttachmentConverter.convert(file, message)
+                }
+            } catch (e: IOException) {
+                MessageDialog.openError(
+                    String.format(I18n.getString("compose_add_attachment_error"), file?.name)
+                )
+            }
+
+            context.arguments = arrayOf()
+        }
+
         val composeDialog = ComposeDialog(shell, bag, message)
         if (composeDialog.open() == Window.OK) {
             if (message.drafted) {
                 storeMessage(message, folderDrafts)
             } else {
-                val client = Client()
                 focusedAccount?.let { account ->
+                    val client = ClientBuilder.build(account, database, bag.options)
                     try {
-                        client.send(account, message)
+                        client.send(message)
 
                         if (!storeMessage(message, folderSent)) {
                             storeMessage(message, folderDrafts)
@@ -839,8 +869,8 @@ class Kilamea : ApplicationWindow {
                     try {
                         PrintWriter(file).use { writer ->
                             when {
-                                extension.equals(".eml", ignoreCase = true) -> writer.println(message.rawData)
-                                extension.equals(".txt", ignoreCase = true) -> writer.println(message.content)
+                                extension.equalsIgnoreCase(".eml") -> writer.println(message.rawData)
+                                extension.equalsIgnoreCase(".txt") -> writer.println(message.content)
                             }
                             writer.flush()
                         }
@@ -963,15 +993,13 @@ class Kilamea : ApplicationWindow {
 
     private inner class FileReceiveAction(text: String, private val index: Int) : Action(text) {
         override fun run() {
-            val client = Client()
-
             val cursor = shell.cursor
             shell.cursor = getDisplay().getSystemCursor(SWT.CURSOR_WAIT)
 
             when (index) {
-                0 -> bag.accounts.forEach { handleTransfer(client, it) }
-                1 -> handleTransfer(client, focusedAccount!!)
-                else -> handleTransfer(client, bag.accounts[index - 2])
+                0 -> bag.accounts.forEach { handleTransfer(it) }
+                1 -> handleTransfer(focusedAccount!!)
+                else -> handleTransfer(bag.accounts[index - 2])
             }
 
             shell.cursor = cursor
@@ -981,15 +1009,17 @@ class Kilamea : ApplicationWindow {
             }
         }
 
-        private fun handleTransfer(client: Client, account: Account) {
+        private fun handleTransfer(account: Account) {
             val folderInbox = account.getFolderByType(FolderType.Inbox)
             if (folderInbox == null) {
                 MessageDialog.openError(I18n.getString("no_inbox_available"))
                 return
             }
 
+            val client = ClientBuilder.build(account, database, bag.options)
+
             try {
-                val messages = client.receive(account, bag.options)
+                val messages = client.receive()
 
                 try {
                     for (message in messages) {
@@ -1305,8 +1335,19 @@ class Kilamea : ApplicationWindow {
     private inner class HelpAboutAction : Action(MenuFactory.getText("help_about_menu")) {
         override fun run() {
             MessageDialog.openInformation(
-                Constants.APP_NAME + SystemUtils.LINE_BREAK + "Version " + Constants.APP_VERSION
+                "${Constants.APP_NAME}${SystemUtils.LINE_BREAK}Version ${Constants.APP_VERSION}${SystemUtils.LINE_BREAK}${SystemUtils.LINE_BREAK}${I18n.getString("published_on_github")}${SystemUtils.LINE_BREAK}${Constants.GITHUB_REPOSITORY_URL}"
             )
+        }
+    }
+
+    private inner class HelpAppDataFolderAction : Action(MenuFactory.getText("help_appdata_folder_menu")) {
+        override fun run() {
+            val folder = context.appDataFolder
+            try {
+                FileUtils.showFolder(folder.toString())
+            } catch (e: IOException) {
+                MessageDialog.openError(String.format(I18n.getString("show_folder_error"), folder.name))
+            }
         }
     }
 }

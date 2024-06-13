@@ -1,12 +1,7 @@
 package com.github.kilamea.view
 
-import java.io.ByteArrayOutputStream
 import java.io.File
-import java.io.FileInputStream
-import java.io.FileOutputStream
-import java.io.InputStream
 import java.io.IOException
-import java.util.Base64
 
 import org.eclipse.jface.action.Action
 import org.eclipse.jface.action.MenuManager
@@ -34,6 +29,7 @@ import com.github.kilamea.core.Constants
 import com.github.kilamea.entity.Attachment
 import com.github.kilamea.entity.Message
 import com.github.kilamea.i18n.I18n
+import com.github.kilamea.mail.AttachmentConverter
 import com.github.kilamea.swt.Dimension
 import com.github.kilamea.swt.FileChooser
 import com.github.kilamea.swt.MessageDialog
@@ -283,18 +279,12 @@ internal class ComposeDialog(parentShell: Shell, private val bag: Bag, private v
                 fileName?.let {
                     val file = File(it)
                     try {
-                        val contentBytes = getContentBytes(file)
-                        val base64Content = Base64.getEncoder().encodeToString(contentBytes)
-                        val attachment = Attachment()
-                        attachment.content = base64Content
-                        attachment.fileName = file.name
-                        attachment.message = message
-                        message.attachments.add(attachment)
-                        attachmentList.add(file.name)
+                        val attachment = AttachmentConverter.convert(file, message)
+                        attachmentList.add(attachment.fileName)
                         attachmentList.setSelection(attachmentList.itemCount - 1)
                         enableDisableActions()
                     } catch (e: IOException) {
-                        MessageDialog.openError(I18n.getString("compose_add_attachment_error"))
+                        MessageDialog.openError(String.format(I18n.getString("compose_add_attachment_error"), file.name))
                     }
                 }
             }
@@ -441,27 +431,6 @@ internal class ComposeDialog(parentShell: Shell, private val bag: Bag, private v
     }
 
     /**
-     * Reads the content of a file and returns it as a byte array.
-     * 
-     * @param file The file to read.
-     * @return The content of the file as a byte array.
-     * @throws IOException If an I/O error occurs while reading the file.
-     */
-    @Throws(IOException::class)
-    private fun getContentBytes(file: File): ByteArray {
-        FileInputStream(file).use { inputStream ->
-            ByteArrayOutputStream().use { outputStream ->
-                val buffer = ByteArray(4096)
-                var bytesRead: Int
-                while (inputStream.read(buffer).also { bytesRead = it } != -1) {
-                    outputStream.write(buffer, 0, bytesRead)
-                }
-                return outputStream.toByteArray()
-            }
-        }
-    }
-
-    /**
      * Represents an action for adding a contact to the email.
      */
     private inner class ContactAction(private val email: String, text: String) : Action(text) {
@@ -505,12 +474,9 @@ internal class ComposeDialog(parentShell: Shell, private val bag: Bag, private v
 
             val fileName = fileChooser.saveDialog()
             fileName?.let {
-                val decodedBytes = Base64.getDecoder().decode(attachment.content)
+                val file = File(it)
                 try {
-                    FileOutputStream(it).use { outputStream ->
-                        outputStream.write(decodedBytes)
-                        outputStream.flush()
-                    }
+                    AttachmentConverter.convert(file, attachment)
                 } catch (e: IOException) {
                     MessageDialog.openError(I18n.getString("compose_save_attachment_error"))
                 }

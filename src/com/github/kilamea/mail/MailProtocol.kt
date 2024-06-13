@@ -1,4 +1,4 @@
-package com.github.kilamea.core
+package com.github.kilamea.mail
 
 /**
  * Enum representing different email protocols.

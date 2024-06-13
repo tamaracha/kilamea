@@ -21,6 +21,6 @@ data class Options(
     var mailSortOrder: SortOrder = SortOrder.Ascending,
     var contactSortField: SortField = SortField.Email,
     var contactSortOrder: SortOrder = SortOrder.Ascending,
-    var retrieveOnStart: Boolean = true,
+    var retrieveOnStart: Boolean = false,
     var deleteFromServer: Boolean = false
 )

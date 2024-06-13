@@ -12,6 +12,8 @@ import java.nio.charset.Charset
 import java.nio.charset.StandardCharsets
 import java.util.stream.Collectors
 
+import com.github.kilamea.util.equalsIgnoreCase
+
 /**
  * Utility class for various file-related operations.
  *
@@ -125,7 +127,7 @@ object FileUtils {
      * @return True if the filename has the specified extension, false otherwise.
      */
     fun hasExtension(name: String, ext: String): Boolean {
-        return getExtension(name).equals(ext, ignoreCase = true)
+        return getExtension(name).equalsIgnoreCase(ext)
     }
 
     /**

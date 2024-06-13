@@ -2,6 +2,8 @@ package com.github.kilamea.sort
 
 import java.lang.reflect.Field
 
+import com.github.kilamea.util.compareToIgnoreCase
+
 /**
  * A comparator that compares objects based on a specified field and sort order.
  * 
@@ -32,7 +34,7 @@ internal class FieldComparator<T>(private var sortField: SortField, private var 
             var result = 0
 
             if (value1 is String && value2 is String) {
-                result = value1.compareTo(value2, ignoreCase = true)
+                result = value1.compareToIgnoreCase(value2)
             } else if (value1 is Comparable<*> && value2 is Comparable<*>) {
                 result = (value1 as Comparable<Any>).compareTo(value2)
             }

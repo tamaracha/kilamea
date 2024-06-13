@@ -1,4 +1,4 @@
-package com.github.kilamea.core
+package com.github.kilamea.mail
 
 import java.security.SecureRandom
 import java.security.cert.X509Certificate
@@ -17,6 +17,8 @@ import javax.net.ssl.SSLContext
 import javax.net.ssl.TrustManager
 import javax.net.ssl.X509TrustManager
 
+import com.github.kilamea.core.Options
+import com.github.kilamea.database.DatabaseManager
 import com.github.kilamea.entity.Account
 import com.github.kilamea.entity.FolderType
 import com.github.kilamea.entity.Message
@@ -27,49 +29,54 @@ import com.github.kilamea.i18n.I18n
  * Class responsible for handling email client operations such as receiving and sending emails.
  *
  * @since 0.1.0
+ * @property account The account from which to receive messages or to send an email.
+ * @property database The database manager for handling database operations.
+ * @property options Additional options for message exchange.
  */
-class Client {
+open class DefaultClient(
+    protected val account: Account,
+    protected val database: DatabaseManager,
+    protected val options: Options
+) {
     /**
      * Retrieves a list of unread messages from the specified email account.
      *
-     * @param account The account from which to receive messages.
-     * @param options Additional options for message retrieval.
      * @return A list of unread messages.
      * @throws ReceiveException If an error occurs during message retrieval.
      */
     @Throws(ReceiveException::class)
-    fun receive(account: Account, options: Options): MessageList {
+    open fun receive(): MessageList {
         disableSSLValidation()
 
         val protocol = account.protocol.clientSpec(account.sslActive)
-        var emailStore: Store? = null
-        var emailFolder: Folder? = null
+        var store: Store? = null
+        var folder: Folder? = null
 
         val properties = Properties()
         properties["mail.store.protocol"] = protocol
         properties["mail.$protocol.host"] = account.incomingHost
         properties["mail.$protocol.port"] = account.incomingPort.toString()
-        val emailSession = Session.getInstance(properties)
+        val session = Session.getInstance(properties)
 
         try {
-            emailStore = emailSession.getStore()
-            emailStore.connect(account.user, account.password)
+            store = session.getStore()
+            store.connect(account.user, account.password)
 
-            emailFolder = emailStore.getFolder(FolderType.Inbox.toString().uppercase())
-            emailFolder.open(Folder.READ_WRITE)
+            folder = store.getFolder(FolderType.Inbox.toString().uppercase())
+            folder.open(Folder.READ_WRITE)
 
-            val unreadMessages = emailFolder.search(FlagTerm(Flags(Flags.Flag.SEEN), false))
+            val unreadMessages = folder.search(FlagTerm(Flags(Flags.Flag.SEEN), false))
             val messages = MessageList()
 
             for (email in unreadMessages) {
-                val newMessage = MailMapper.map(email as MimeMessage)
+                val newMessage = MailMapper.mapMimeMessageToMessage(email as MimeMessage)
                 messages.add(newMessage)
                 if (account.protocol == MailProtocol.IMAP && options.deleteFromServer) {
                     email.setFlag(Flags.Flag.DELETED, true)
                 }
             }
             if (account.protocol == MailProtocol.IMAP && options.deleteFromServer) {
-                emailFolder.expunge()
+                folder.expunge()
             }
 
             return messages
@@ -77,11 +84,11 @@ class Client {
             throw ReceiveException(e.message ?: "", e)
         } finally {
             try {
-                if (emailFolder != null && emailFolder.isOpen) {
-                    emailFolder.close(false)
+                if (folder != null && folder.isOpen) {
+                    folder.close(false)
                 }
-                if (emailStore != null && emailStore.isConnected) {
-                    emailStore.close()
+                if (store != null && store.isConnected) {
+                    store.close()
                 }
             } catch (e: Exception) {
                 throw ReceiveException(e.message ?: "", e)
@@ -92,12 +99,11 @@ class Client {
     /**
      * Sends an email using the specified account and message.
      *
-     * @param account The account from which to send the email.
      * @param message The message to be sent.
      * @throws SendException If an error occurs during email sending.
      */
     @Throws(SendException::class)
-    fun send(account: Account, message: Message) {
+    open fun send(message: Message) {
         disableSSLValidation()
 
         val properties = Properties()
@@ -106,14 +112,14 @@ class Client {
         properties["mail.smtp.host"] = account.outgoingHost
         properties["mail.smtp.port"] = account.outgoingPort.toString()
 
-        val emailSession = Session.getInstance(properties, object : Authenticator() {
+        val session = Session.getInstance(properties, object : Authenticator() {
             override fun getPasswordAuthentication(): PasswordAuthentication {
                 return PasswordAuthentication(account.user, account.password)
             }
         })
 
         try {
-            val newEmail = MailMapper.map(emailSession, message)
+            val newEmail = MailMapper.mapMessageToMimeMessage(message, session)
             Transport.send(newEmail)
         } catch (e: Exception) {
             throw SendException(e.message ?: "", e)

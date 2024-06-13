@@ -22,6 +22,7 @@ import com.github.kilamea.entity.Contact
 import com.github.kilamea.i18n.I18n
 import com.github.kilamea.swt.MessageDialog
 import com.github.kilamea.swt.ModalDialog
+import com.github.kilamea.util.equalsIgnoreCase
 
 /**
  * Represents a dialog for managing contacts, including adding, editing, and deleting contacts.
@@ -112,8 +113,10 @@ internal class ContactDialog(parentShell: Shell, private val bag: Bag, private v
         deleteButton.text = I18n.getString("contact_delete_button")
         deleteButton.addSelectionListener(object : SelectionAdapter() {
             override fun widgetSelected(event: SelectionEvent) {
-                deleteContact()
-                emailCombo.setFocus()
+                if (MessageDialog.openConfirm(I18n.getString("confirm_delete_contact")) == SWT.YES) {
+                    deleteContact()
+                    emailCombo.setFocus()
+                }
             }
         })
 
@@ -163,7 +166,7 @@ internal class ContactDialog(parentShell: Shell, private val bag: Bag, private v
         }
 
         bag.contacts.forEach {
-            if (it != contact && it.email.equals(value, ignoreCase = true)) {
+            if (it != contact && it.email.equalsIgnoreCase(value)) {
                 emailCombo.setFocus()
                 MessageDialog.openError(I18n.getString("contact_exists_error"))
                 return false

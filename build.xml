@@ -2,11 +2,12 @@
 <project name="Kilamea" basedir="." default="all">
 
     <!-- Define properties -->
-    <property name="kotlin.home" value=""/>
+    <property environment="env"/>
+    <property name="kotlin.compile" value="${env.KOTLIN_COMPILE}"/>
     <property name="jar.file" value="Kilamea.jar"/>
     <property name="temp.file" value="temp.jar"/>
     <property name="main.class" value="com.github.kilamea.Launcher"/>
-    <property name="class.path.entry" value="lib/commons-lang3.jar lib/gson.jar lib/javax.mail.jar lib/liquibase-core.jar lib/org.eclipse.core.commands.jar lib/org.eclipse.equinox.common.jar lib/org.eclipse.jface.jar lib/org.eclipse.osgi.jar lib/sqlite-jdbc.jar lib/swt-win32-win32-x86_64.jar"/>
+    <property name="class.path.entry" value="lib/commons-lang3.jar lib/google-api-client.jar lib/google-api-services-gmail.jar lib/google-http-client.jar lib/google-http-client-jackson2.jar lib/google-oauth-client.jar lib/google-oauth-client-java6.jar lib/google-oauth-client-jetty.jar lib/gson.jar lib/jackson-core.jar lib/javax.mail.jar lib/javax.servlet.jar lib/jetty.jar lib/jetty-util.jar lib/liquibase-core.jar lib/org.eclipse.core.commands.jar lib/org.eclipse.equinox.common.jar lib/org.eclipse.jface.jar lib/org.eclipse.osgi.jar lib/sqlite-jdbc.jar lib/swt-win32-win32-x86_64.jar"/>
 
     <!-- Define target to replace spaces with semicolons in class path -->
     <target name="replaceSpaces">
@@ -27,20 +28,14 @@
 
     <!-- Define target to compile Kotlin files -->
     <target name="compile" depends="replaceSpaces,clean">
-        <exec executable="${kotlin.home}/bin/kotlinc.bat">
+        <exec executable="${kotlin.compile}">
             <arg value="-cp"/>
             <arg value='"${lib.files}"'/>
             <arg value="src/com/github/kilamea/Launcher.kt"/>
             <arg value="src/com/github/kilamea/core/Bag.kt"/>
-            <arg value="src/com/github/kilamea/core/Client.kt"/>
             <arg value="src/com/github/kilamea/core/Constants.kt"/>
             <arg value="src/com/github/kilamea/core/Context.kt"/>
-            <arg value="src/com/github/kilamea/core/MailMapper.kt"/>
-            <arg value="src/com/github/kilamea/core/MailProtocol.kt"/>
-            <arg value="src/com/github/kilamea/core/MimeType.kt"/>
             <arg value="src/com/github/kilamea/core/Options.kt"/>
-            <arg value="src/com/github/kilamea/core/ReceiveException.kt"/>
-            <arg value="src/com/github/kilamea/core/SendException.kt"/>
             <arg value="src/com/github/kilamea/database/DatabaseManager.kt"/>
             <arg value="src/com/github/kilamea/database/DBRuntimeException.kt"/>
             <arg value="src/com/github/kilamea/entity/AbstractEntity.kt"/>
@@ -58,6 +53,16 @@
             <arg value="src/com/github/kilamea/entity/MessageList.kt"/>
             <arg value="src/com/github/kilamea/i18n/I18n.kt"/>
             <arg value="src/com/github/kilamea/i18n/Language.kt"/>
+            <arg value="src/com/github/kilamea/mail/AttachmentConverter.kt"/>
+            <arg value="src/com/github/kilamea/mail/AuthException.kt"/>
+            <arg value="src/com/github/kilamea/mail/ClientBuilder.kt"/>
+            <arg value="src/com/github/kilamea/mail/DefaultClient.kt"/>
+            <arg value="src/com/github/kilamea/mail/GmailClient.kt"/>
+            <arg value="src/com/github/kilamea/mail/MailMapper.kt"/>
+            <arg value="src/com/github/kilamea/mail/MailProtocol.kt"/>
+            <arg value="src/com/github/kilamea/mail/MimeType.kt"/>
+            <arg value="src/com/github/kilamea/mail/ReceiveException.kt"/>
+            <arg value="src/com/github/kilamea/mail/SendException.kt"/>
             <arg value="src/com/github/kilamea/sort/ComparatorPool.kt"/>
             <arg value="src/com/github/kilamea/sort/FieldComparator.kt"/>
             <arg value="src/com/github/kilamea/sort/SortField.kt"/>
@@ -71,6 +76,7 @@
             <arg value="src/com/github/kilamea/swt/TabTraverse.kt"/>
             <arg value="src/com/github/kilamea/util/FileUtils.kt"/>
             <arg value="src/com/github/kilamea/util/PasswordCrypt.kt"/>
+            <arg value="src/com/github/kilamea/util/StringExtensions.kt"/>
             <arg value="src/com/github/kilamea/util/SystemUtils.kt"/>
             <arg value="src/com/github/kilamea/view/AccountDialog.kt"/>
             <arg value="src/com/github/kilamea/view/ComposeDialog.kt"/>

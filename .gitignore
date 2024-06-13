@@ -1,4 +1,5 @@
 jdk-22/
+res/oauth/*.json
 Kilamea.exe
 Kilamea.jar
 temp.jar
