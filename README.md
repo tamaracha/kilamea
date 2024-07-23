@@ -25,7 +25,16 @@ Of course, anyone not affected can also use the software with pleasure. Everythi
 
 ## Technical notes
 
-The application is entirely written in Kotlin (currently version 1.9). For compilation, I use the command line tools. The generated .class files are then packaged into an executable JAR file along with the Kotlin runtime, the resources and the manifest.  
-I automate this process using Apache Ant. Therefore, modifications to the build.xml might be necessary for your own development environment.
+The application is entirely written in Kotlin (currently version 2.0) and targets JVM 22.
+It is built using Gradle.
+If you're using IntelliJ, just import it from github and build or run the app.
+Maybe you'll have to choose and install a Java version for IntelliJ.
+This is not related to the target version for this project code.
 
-For Windows users, I also offer a way to wrap the executable JAR file into an EXE using Launch4j. I include the OpenJDK (currently version 22) as the VM. The configuration can be found in the launch4j.xml.
+If you want to build from command line, please make sure you have Java in your path.
+
+1. Clone this repo
+2. Open terminal in the root of this project.
+3. Generally, Gradle is executed with `./gradlew` on Linux/Mac, and with `gradlew.bat` on Windows. Run this to let Gradle prepare.
+4. Build the project with `gradle.bat build`
+5. Run the app: `./gradlew run`
