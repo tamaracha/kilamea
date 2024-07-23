@@ -9,7 +9,7 @@ import java.io.IOException
  * @property LINE_BREAK The line break string for the current operating system.
  */
 object SystemUtils {
-    val LINE_BREAK: String = System.getProperty("line.separator")
+    val LINE_BREAK: String = System.lineSeparator()
 
     /**
      * Gets the OS architecture.
