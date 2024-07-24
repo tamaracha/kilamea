@@ -1346,7 +1346,7 @@ class Kilamea : ApplicationWindow {
             try {
                 FileUtils.showFolder(folder.toString())
             } catch (e: IOException) {
-                MessageDialog.openError(String.format(I18n.getString("show_folder_error"), folder.name))
+                MessageDialog.openError(String.format(I18n.getString("show_folder_error"), folder.fileName))
             }
         }
     }

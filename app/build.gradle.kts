@@ -24,6 +24,7 @@ dependencies {
     implementation(libs.jetty)
     implementation(libs.jetty.util)
     implementation(libs.bundles.gmail)
+    implementation(libs.appdirs)
     // Use local swt files because eclipse is not able to build working maven packages
     implementation(fileTree("../lib").include("*.jar"))
 

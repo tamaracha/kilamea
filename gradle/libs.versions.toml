@@ -18,8 +18,10 @@ google-oauth-client = "1.36.0"
 google-api-services-gmail = "v1-rev110-1.25.0"
 junit-jupiter-engine = "5.10.2"
 slf4j = "2.0.13"
+appdirs = "1.2.2"
 
 [libraries]
+appdirs = { module = "net.harawata:appdirs", version.ref = "appdirs" }
 javax-activation = { module = "com.sun.activation:javax.activation", version.ref = "activation" }
 javax-mail = { module = "com.sun.mail:javax.mail", version.ref = "mail" }
 commons-lang3 = { module = "org.apache.commons:commons-lang3", version.ref = "commons-lang3" }

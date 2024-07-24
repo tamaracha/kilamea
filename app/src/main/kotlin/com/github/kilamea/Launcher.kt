@@ -1,7 +1,7 @@
 package com.github.kilamea
 
-import java.io.File
 import java.io.IOException
+import java.nio.file.Path
 import java.util.logging.ConsoleHandler
 import java.util.logging.FileHandler
 import java.util.logging.Level
@@ -48,7 +48,7 @@ object Launcher {
      * @throws IOException If logging cannot be initialized.
      */
     @Throws(IOException::class)
-    private fun initLogging(logFile: File) {
+    private fun initLogging(logFile: Path) {
         val rootLogger = Logger.getLogger("")
         rootLogger.handlers.forEach { rootLogger.removeHandler(it) }
 

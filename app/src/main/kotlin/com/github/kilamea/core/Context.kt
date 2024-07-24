@@ -1,8 +1,10 @@
 package com.github.kilamea.core
 
-import java.io.File
-
-import com.github.kilamea.util.FileUtils
+import java.nio.file.Path
+import java.nio.file.Paths
+import kotlin.io.path.createDirectories
+import net.harawata.appdirs.AppDirs
+import net.harawata.appdirs.AppDirsFactory
 
 /**
  * Context class holding application arguments and providing paths to important files.
@@ -14,9 +16,12 @@ import com.github.kilamea.util.FileUtils
  * @property logFile The file to which log messages should be written.
  */
 class Context(var arguments: Array<String>) {
-    val appDataFolder: File = FileUtils.getAppDataFolder()
-    val databaseFile: File = File(appDataFolder, Constants.DATABASE_FILE_NAME)
-    val logFile: File = File(appDataFolder, Constants.LOG_FILE_NAME)
+    private val appName = "kilamea"
+    private val appDirs: AppDirs = AppDirsFactory.getInstance()
+    val appDataFolder: Path = Paths.get(appDirs.getUserDataDir(appName, null, null)).apply { createDirectories() }
+    private val logFolder: Path = Paths.get(appDirs.getUserLogDir(appName, null, null)).apply { createDirectories() }
+    val databaseFile: Path = appDataFolder.resolve(Constants.DATABASE_FILE_NAME)
+    val logFile: Path = logFolder.resolve(Constants.LOG_FILE_NAME)
 
     /**
      * Checks if there are any command line arguments.
