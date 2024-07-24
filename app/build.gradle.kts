@@ -12,10 +12,21 @@ repositories {
 }
 
 dependencies {
+    implementation(libs.javax.activation)
+    implementation(libs.javax.mail)
+    implementation(libs.commons.lang3)
+    implementation(libs.gson)
+    implementation(libs.jackson)
+    implementation(libs.liquibase)
+    implementation(libs.sqlite.jdbc)
+    implementation(libs.jetty)
+    implementation(libs.jetty.util)
+    implementation(libs.bundles.gmail)
+    // Use local swt files because eclipse is not able to build working maven packages
     implementation(fileTree("../lib").include("*.jar"))
-    implementation(libs.activation)
-    // Use the Kotlin JUnit 5 integration.
-    testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
+
+        // Use the Kotlin JUnit 5 integration.
+    testImplementation(libs.kotlin.test.junit5)
 
     // Use the JUnit 5 integration.
     testImplementation(libs.junit.jupiter.engine)

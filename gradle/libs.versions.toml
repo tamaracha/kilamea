@@ -2,12 +2,47 @@
 # https://docs.gradle.org/current/userguide/platforms.html#sub::toml-dependencies-format
 
 [versions]
+kotlin = "2.0.0"
 activation = "1.2.0"
+mail = "1.6.2"
+commons-lang3 = "3.15.0"
+gson = "2.11.0"
+jackson = "2.17.2"
+liquibase = "4.28.0"
+sqlite-jdbc = "3.46.0.0"
+servlet = "4.0.1"
+jetty = "6.1.26"
+google-api-client = "2.6.0"
+google-http-client = "1.44.2"
+google-oauth-client = "1.36.0"
+google-api-services-gmail = "v1-rev110-1.25.0"
 junit-jupiter-engine = "5.10.2"
 
 [libraries]
-activation = { module = "com.sun.activation:javax.activation", version.ref = "activation" }
+javax-activation = { module = "com.sun.activation:javax.activation", version.ref = "activation" }
+javax-mail = { module = "com.sun.mail:javax.mail", version.ref = "mail" }
+commons-lang3 = { module = "org.apache.commons:commons-lang3", version.ref = "commons-lang3" }
+gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
+jackson = { module = "com.fasterxml.jackson.core:jackson-core", version.ref = "jackson" }
+liquibase = { module = "org.liquibase:liquibase-core", version.ref = "liquibase" }
+sqlite-jdbc = { module = "org.xerial:sqlite-jdbc", version.ref = "sqlite-jdbc" }
+servlet = { module = "javax.servlet:javax.servlet-api", version.ref = "servlet" }
+jetty = { module = "org.mortbay.jetty:jetty", version.ref = "jetty" }
+jetty-util = { module = "org.mortbay.jetty:jetty-util", version.ref = "jetty" }
+google-api-client = { module = "com.google.api-client:google-api-client", version.ref = "google-api-client" }
+google-http-client-jackson2 = { module = "com.google.http-client:google-http-client-jackson2", version.ref = "google-http-client" }
+google-oauth-client-jetty = { module = "com.google.oauth-client:google-oauth-client-jetty", version.ref = "google-oauth-client" }
+google-api-services-gmail = { module = "com.google.apis:google-api-services-gmail", version.ref = "google-api-services-gmail" }
+kotlin-test-junit5 = { module = "org.jetbrains.kotlin:kotlin-test-junit5" }
 junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit-jupiter-engine" }
 
 [plugins]
-jvm = { id = "org.jetbrains.kotlin.jvm", version = "2.0.0" }
+jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+
+[bundles]
+gmail = [
+    "google-api-client",
+    "google-http-client-jackson2",
+    "google-oauth-client-jetty",
+    "google-api-services-gmail"
+]
