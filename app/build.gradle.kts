@@ -12,6 +12,8 @@ repositories {
 }
 
 dependencies {
+    implementation(libs.slf4j.api)
+    implementation(libs.slf4j.nop)
     implementation(libs.javax.activation)
     implementation(libs.javax.mail)
     implementation(libs.commons.lang3)
@@ -32,6 +34,7 @@ dependencies {
     testImplementation(libs.junit.jupiter.engine)
 
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    testImplementation(libs.slf4j.simple)
 }
 
 // Apply a specific Java toolchain to ease working on different environments.
