@@ -11,7 +11,7 @@ jackson = "2.17.2"
 liquibase = "4.28.0"
 sqlite-jdbc = "3.46.0.0"
 servlet = "4.0.1"
-jetty = "6.1.26"
+jetty = "12.0.11"
 google-api-client = "2.6.0"
 google-http-client = "1.44.2"
 google-oauth-client = "1.36.0"
@@ -30,8 +30,8 @@ jackson = { module = "com.fasterxml.jackson.core:jackson-core", version.ref = "j
 liquibase = { module = "org.liquibase:liquibase-core", version.ref = "liquibase" }
 sqlite-jdbc = { module = "org.xerial:sqlite-jdbc", version.ref = "sqlite-jdbc" }
 servlet = { module = "javax.servlet:javax.servlet-api", version.ref = "servlet" }
-jetty = { module = "org.mortbay.jetty:jetty", version.ref = "jetty" }
-jetty-util = { module = "org.mortbay.jetty:jetty-util", version.ref = "jetty" }
+jetty = { module = "org.eclipse.jetty:jetty-server", version.ref = "jetty" }
+jetty-util = { module = "org.eclipse.jetty:jetty-util", version.ref = "jetty" }
 google-api-client = { module = "com.google.api-client:google-api-client", version.ref = "google-api-client" }
 google-http-client-jackson2 = { module = "com.google.http-client:google-http-client-jackson2", version.ref = "google-http-client" }
 google-oauth-client-jetty = { module = "com.google.oauth-client:google-oauth-client-jetty", version.ref = "google-oauth-client" }
