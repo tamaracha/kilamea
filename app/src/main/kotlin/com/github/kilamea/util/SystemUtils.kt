@@ -1,6 +1,8 @@
 package com.github.kilamea.util
 
 import java.io.IOException
+import java.awt.Desktop
+import java.net.URI
 
 /**
  * Utility class for system-related functions.
@@ -67,19 +69,6 @@ object SystemUtils {
      */
     @Throws(IOException::class)
     fun openUrl(url: String) {
-        val runtime = Runtime.getRuntime()
-
-        if (isWindows()) {
-            runtime.exec("rundll32.exe url.dll,FileProtocolHandler $url")
-        } else if (isMac()) {
-            runtime.exec("open $url")
-        } else {
-            val browsers = arrayOf("epiphany", "firefox", "mozilla", "konqueror", "netscape", "opera", "links", "lynx")
-            val cmd = StringBuilder()
-            for (i in browsers.indices) {
-                cmd.append((if (i == 0) "" else " || ") + browsers[i] + " \"$url\" ")
-            }
-            runtime.exec(arrayOf("sh", "-c", cmd.toString()))
-        }
+        Desktop.getDesktop().browse(URI(url))
     }
 }
