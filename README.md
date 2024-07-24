@@ -23,18 +23,47 @@ Of course, anyone not affected can also use the software with pleasure. Everythi
 - Implementation of spam filter
 - Backup tools
 
-## Technical notes
+## Implementation
 
 The application is entirely written in Kotlin (currently version 2.0) and targets JVM 22.
-It is built using Gradle.
-If you're using IntelliJ, just import it from github and build or run the app.
-Maybe you'll have to choose and install a Java version for IntelliJ.
-This is not related to the target version for this project code.
 
-If you want to build from command line, please make sure you have Java in your path.
+## Development
 
-1. Clone this repo
-2. Open terminal in the root of this project.
-3. Generally, Gradle is executed with `./gradlew` on Linux/Mac, and with `gradlew.bat` on Windows. Run this to let Gradle prepare.
-4. Build the project with `gradle.bat build`
-5. Run the app: `./gradlew run`
+Gradle is used to build, test, execute, and package the app.
+
+### Prequisites
+
+Gradle depends on Java, so Java must be installed on your dev machine.
+
+#### Windows
+
+1. Download OpenJDK version 22 for Windows from the [official OpenJDK release page].
+2. Extract the zip archive to `C:\Program Files\Java\jdk-22.0.2`
+3. Go to System settings -> Advanced -> Environment variables.
+4. Set or add `JAVA_HOME` to `C:\Program Files\Java\jdk-22.0.2`
+
+#### macOS
+
+1. Download OpenJDK version 22 for Mac from the [official OpenJDK release page].
+2. Extract the tar archive and copy the resulting `jdk-22.0.2.jdk` into `/Library/Java/JavaVirtualMachines/`
+3. Setting `JAVA_HOME` is not necessary, macOS will find your installation.
+
+### Build from command line
+
+1. Open a terminal
+2. Clone this repo locally: `git clone git@github.com:kschroeer/kilamea.git`
+3. Go to project root: `cd kilamea`
+
+#### Windows
+
+1. Check gradle works: `gradlew.bat`
+2. Build the project with `gradlew.bat build`
+3. Run the app: `gradlew.bat run`
+
+#### Mac and Linux
+
+1. Check gradle works: `./gradlew`
+2. Build the project with `./gradlew build`
+3. Run the app: `./gradlew run`
+
+[official OpenJDK release page]: https://jdk.java.net/22/
