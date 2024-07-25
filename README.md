@@ -59,11 +59,13 @@ Gradle depends on Java, so Java must be installed on your dev machine.
 1. Check gradle works: `gradlew.bat`
 2. Build the project with `gradlew.bat build`
 3. Run the app: `gradlew.bat run`
+4. Package the app as installer for your platform: `gradlew.bat jpackage`
 
 #### Mac and Linux
 
 1. Check gradle works: `./gradlew`
 2. Build the project with `./gradlew build`
 3. Run the app: `./gradlew run`
+4. Package the app as installer for your platform: `./gradlew jpackage`
 
 [official OpenJDK release page]: https://jdk.java.net/22/

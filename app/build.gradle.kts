@@ -1,9 +1,12 @@
+import org.gradle.internal.os.OperatingSystem
+
 plugins {
     // Apply the org.jetbrains.kotlin.jvm Plugin to add support for Kotlin.
     alias(libs.plugins.jvm)
 
     // Apply the application plugin to add support for building a CLI application in Java.
     application
+    alias(libs.plugins.badass.runtime)
 }
 
 repositories {
@@ -48,10 +51,41 @@ java {
 application {
     // Define the main class for the application.
     mainClass = "com.github.kilamea.Launcher"
-    applicationDefaultJvmArgs = listOf("-XstartOnFirstThread")
+    applicationName = "kilamea"
+    if (OperatingSystem.current().isMacOsX) {
+        applicationDefaultJvmArgs = listOf("-XstartOnFirstThread")
+    }
 }
 
 tasks.named<Test>("test") {
     // Use JUnit Platform for unit tests.
     useJUnitPlatform()
+}
+
+runtime {
+    options = listOf("--strip-debug", "--compress", "zip-6", "--no-header-files", "--no-man-pages")
+    modules = listOf("java.naming", "java.desktop", "java.logging", "java.sql")
+
+    launcher {
+        noConsole = true
+    }
+
+    jpackage {
+        val appName = "Kilamea"
+        imageName = appName
+        installerName = appName
+        installerOptions = mutableListOf("--resource-dir", "src/main/resources")
+        if(OperatingSystem.current().isWindows) {
+            installerName = "$appName-setup"
+            installerOptions.addAll(listOf("--win-per-user-install", "--win-dir-chooser", "--win-menu", "--win-shortcut"))
+            installerType = "exe"
+        }
+        else if (OperatingSystem.current().isLinux) {
+            installerOptions.addAll(listOf("--linux-package-name", "kilamea", "--linux-shortcut"))
+        }
+        else if (OperatingSystem.current().isMacOsX) {
+            installerOptions.addAll(listOf("--mac-package-name", "kilamea"))
+            installerType = "dmg"
+        }
+    }
 }
