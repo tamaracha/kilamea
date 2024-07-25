@@ -28,7 +28,16 @@ dependencies {
     implementation(libs.jetty.util)
     implementation(libs.bundles.gmail)
     implementation(libs.appdirs)
-    // Use local swt files because eclipse is not able to build working maven packages
+    implementation(libs.jface)
+    implementation(libs.commands)
+    // Load platform-native SWT dependency
+    if (OperatingSystem.current().isWindows) {
+        implementation(libs.swt.windows)
+    }
+    else if (OperatingSystem.current().isMacOsX) {
+        implementation(libs.swt.mac)
+    }
+    // Load SWT language pack
     implementation(fileTree("../lib").include("*.jar"))
 
         // Use the Kotlin JUnit 5 integration.
@@ -39,6 +48,13 @@ dependencies {
 
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation(libs.slf4j.simple)
+}
+
+// Prevent automagic platform detection hack for SWT which doesn't work with gradle
+configurations {
+    implementation {
+        exclude(group = "org.eclipse.platform", module = "org.eclipse.swt.\${osgi.platform}")
+    }
 }
 
 // Apply a specific Java toolchain to ease working on different environments.

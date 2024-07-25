@@ -44,9 +44,14 @@ Gradle depends on Java, so Java must be installed on your dev machine.
 
 #### macOS
 
-1. Download OpenJDK version 22 for Mac from the [official OpenJDK release page].
-2. Extract the tar archive and copy the resulting `jdk-22.0.2.jdk` into `/Library/Java/JavaVirtualMachines/`
-3. Setting `JAVA_HOME` is not necessary, macOS will find your installation.
+1. Download OpenJDK version 22 for Mac from the [official OpenJDK release page]. Please use the x64 binary, even if you have an M1 Mac.
+2. Create a folder in your user directory, e.g., `~/java`, extract the downloaded tar archive and copy the resulting `jdk-22.0.2.jdk` into `~/Java/`
+3. Open `~/.zshrc` in a text editor and add this line, so your JDK can be found:
+
+```sh
+export JAVA_HOME="/Users/$(whoami)/Java/jdk-22.0.2.jdk/Contents/Home"
+export JDK_HOME=${JAVA_HOME}
+```
 
 ### Build from command line
 
@@ -57,9 +62,9 @@ Gradle depends on Java, so Java must be installed on your dev machine.
 #### Windows
 
 1. Check gradle works: `gradlew.bat`
-2. Build the project with `gradlew.bat build`
-3. Run the app: `gradlew.bat run`
-4. Package the app as installer for your platform: `gradlew.bat jpackage`
+2. Build the project with `gradlew build`
+3. Run the app: `gradlew run`
+4. Package the app as installer for your platform: `gradlew jpackage`
 
 #### Mac and Linux
 
