@@ -48,6 +48,7 @@ java {
 application {
     // Define the main class for the application.
     mainClass = "com.github.kilamea.Launcher"
+    applicationDefaultJvmArgs = listOf("-XstartOnFirstThread")
 }
 
 tasks.named<Test>("test") {
