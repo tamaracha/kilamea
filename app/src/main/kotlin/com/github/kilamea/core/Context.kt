@@ -16,10 +16,9 @@ import net.harawata.appdirs.AppDirsFactory
  * @property logFile The file to which log messages should be written.
  */
 class Context(var arguments: Array<String>) {
-    private val appName = "kilamea"
     private val appDirs: AppDirs = AppDirsFactory.getInstance()
-    val appDataFolder: Path = Paths.get(appDirs.getUserDataDir(appName, null, null)).apply { createDirectories() }
-    private val logFolder: Path = Paths.get(appDirs.getUserLogDir(appName, null, null)).apply { createDirectories() }
+    val appDataFolder: Path = Paths.get(appDirs.getUserDataDir(Constants.APP_NAME, null, null)).apply { createDirectories() }
+    private val logFolder: Path = Paths.get(appDirs.getUserLogDir(Constants.APP_NAME, null, null)).apply { createDirectories() }
     val databaseFile: Path = appDataFolder.resolve(Constants.DATABASE_FILE_NAME)
     val logFile: Path = logFolder.resolve(Constants.LOG_FILE_NAME)
 
