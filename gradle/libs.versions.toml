@@ -19,7 +19,7 @@ google-api-services-gmail = "v1-rev110-1.25.0"
 junit-jupiter-engine = "5.10.2"
 slf4j = "2.0.13"
 appdirs = "1.2.2"
-swt = "3.114.0"
+swt = "3.126.0"
 jface = "3.31.0"
 commands = "3.9.700"
 

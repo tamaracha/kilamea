@@ -262,7 +262,7 @@ class Kilamea : ApplicationWindow {
 
         val messageComposite = Composite(sashForm, SWT.NONE)
         messageComposite.layout = GridLayout()
-        sashForm.weights = intArrayOf(1, 6)
+        sashForm.setWeights(1, 6)
 
         messageAccLabel = Label(messageComposite, SWT.NONE)
         val messageLabelGridData = GridData()
