@@ -44,7 +44,7 @@ Gradle depends on Java, so Java must be installed on your dev machine.
 
 #### macOS
 
-1. Download OpenJDK version 22 for Mac from the [official OpenJDK release page]. Please use the x64 binary, even if you have an M1 Mac.
+1. Download OpenJDK version 22 for Mac from the [official OpenJDK release page].
 2. Create a folder in your user directory, e.g., `~/java`, extract the downloaded tar archive and copy the resulting `jdk-22.0.2.jdk` into `~/Java/`
 3. Open `~/.zshrc` in a text editor and add this line, so your JDK can be found:
 
