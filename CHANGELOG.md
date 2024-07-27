@@ -15,10 +15,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Application data and logs are not stored relative to the app anymore. The app uses conventional folders for these purposes in the user directory.
 
-### Fixed
-
-- Opening folders or URLs from the app became more stable and reliable on different operating systems
-
 ## 0.2.0 (2024-06-13)
 
 - Bundling the tools for processing file attachments in the new `AttachmentConverter` class

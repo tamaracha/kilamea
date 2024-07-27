@@ -80,7 +80,7 @@ tasks.named<Test>("test") {
 
 runtime {
     options = listOf("--strip-debug", "--compress", "zip-6", "--no-header-files", "--no-man-pages")
-    modules = listOf("java.naming", "java.desktop", "java.logging", "java.sql")
+    modules = listOf("java.naming", "java.logging", "java.sql")
 
     launcher {
         noConsole = true

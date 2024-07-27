@@ -11,7 +11,6 @@ import java.net.URLDecoder
 import java.nio.charset.Charset
 import java.nio.charset.StandardCharsets
 import java.util.stream.Collectors
-import java.awt.Desktop
 
 import com.github.kilamea.util.equalsIgnoreCase
 
@@ -169,6 +168,11 @@ object FileUtils {
      */
     @Throws(IOException::class)
     fun showFolder(path: String) {
-        Desktop.getDesktop().open(File(path))
+        val runtime = Runtime.getRuntime()
+        if (SystemUtils.isWindows()) {
+            runtime.exec("explorer.exe \"$path\"")
+        } else if (SystemUtils.isMac()) {
+            runtime.exec("open $path")
+        }
     }
 }
