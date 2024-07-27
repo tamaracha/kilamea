@@ -474,7 +474,7 @@ class Kilamea : ApplicationWindow {
     fun run() {
         setBlockOnOpen(true)
         open()
-        Display.getCurrent().dispose()
+        Display.getCurrent()?.dispose()
     }
 
     /**
