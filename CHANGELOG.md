@@ -9,7 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- macOS support
+- Support for macOS and Linux
+- also  runs on M1 Mac, Windows Arm or Linux aarch64 CPU architecture 
 
 ### Changed
 

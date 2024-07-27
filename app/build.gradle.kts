@@ -1,4 +1,6 @@
-import org.gradle.internal.os.OperatingSystem
+import org.gradle.nativeplatform.platform.OperatingSystem
+import org.gradle.nativeplatform.platform.Architecture
+import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform
 
 plugins {
     // Apply the org.jetbrains.kotlin.jvm Plugin to add support for Kotlin.
@@ -8,6 +10,9 @@ plugins {
     application
     alias(libs.plugins.badass.runtime)
 }
+
+val currentOs: OperatingSystem = DefaultNativePlatform.getCurrentOperatingSystem()
+val currentArch: Architecture = DefaultNativePlatform.getCurrentArchitecture()
 
 repositories {
     // Use Maven Central for resolving dependencies.
@@ -31,11 +36,26 @@ dependencies {
     implementation(libs.jface)
     implementation(libs.commands)
     // Load platform-native SWT dependency
-    if (OperatingSystem.current().isWindows) {
-        implementation(libs.swt.windows)
+    if (currentOs.isWindows) {
+        if(currentArch.name == "x86-64") {
+            implementation(libs.swt.windows.x64)
+        } else if(currentArch.name == "aarch64") {
+            implementation(libs.swt.windows.aarch64)
+        }
     }
-    else if (OperatingSystem.current().isMacOsX) {
-        implementation(libs.swt.mac)
+    else if (currentOs.isMacOsX) {
+        if(currentArch.name == "x86-64") {
+            implementation(libs.swt.mac.x64)
+        } else if(currentArch.name == "aarch64") {
+            implementation(libs.swt.mac.aarch64)
+        }
+    }
+    else if (currentOs.isLinux) {
+        if(currentArch.name == "x86-64") {
+            implementation(libs.swt.linux.x64)
+        } else if(currentArch.name == "aarch64") {
+            implementation(libs.swt.linux.aarch64)
+        }
     }
     // Load SWT language pack
     implementation(fileTree("../lib").include("*.jar"))
@@ -68,7 +88,7 @@ application {
     // Define the main class for the application.
     mainClass = "com.github.kilamea.Launcher"
     applicationName = "kilamea"
-    if (OperatingSystem.current().isMacOsX) {
+    if (currentOs.isMacOsX) {
         applicationDefaultJvmArgs = listOf("-XstartOnFirstThread")
     }
 }
@@ -91,15 +111,15 @@ runtime {
         imageName = appName
         installerName = appName
         installerOptions = mutableListOf("--resource-dir", "src/main/resources")
-        if(OperatingSystem.current().isWindows) {
+        if(currentOs.isWindows) {
             installerName = "$appName-setup"
             installerOptions.addAll(listOf("--win-per-user-install", "--win-dir-chooser", "--win-menu", "--win-shortcut"))
             installerType = "exe"
         }
-        else if (OperatingSystem.current().isLinux) {
+        else if (currentOs.isLinux) {
             installerOptions.addAll(listOf("--linux-package-name", "kilamea", "--linux-shortcut"))
         }
-        else if (OperatingSystem.current().isMacOsX) {
+        else if (currentOs.isMacOsX) {
             installerOptions.addAll(listOf("--mac-package-name", "kilamea"))
             installerType = "dmg"
         }
