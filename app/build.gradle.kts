@@ -79,6 +79,7 @@ configurations {
 
 // Apply a specific Java toolchain to ease working on different environments.
 java {
+
     toolchain {
         languageVersion = JavaLanguageVersion.of(22)
     }
@@ -90,6 +91,12 @@ application {
     applicationName = "kilamea"
     if (currentOs.isMacOsX) {
         applicationDefaultJvmArgs = listOf("-XstartOnFirstThread")
+    }
+}
+
+tasks.named<Jar>("jar") {
+    manifest {
+        attributes(mapOf("Main-Class" to application.mainClass))
     }
 }
 
