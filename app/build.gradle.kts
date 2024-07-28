@@ -95,8 +95,13 @@ application {
 }
 
 tasks.named<Jar>("jar") {
+    dependsOn(configurations.runtimeClasspath)
+
     manifest {
-        attributes(mapOf("Main-Class" to application.mainClass))
+        attributes(mapOf(
+            "Main-Class" to application.mainClass,
+            "Class-Path" to configurations.runtimeClasspath.get().joinToString(" ") { it.name }
+        ))
     }
 }
 
